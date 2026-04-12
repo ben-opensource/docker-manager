@@ -1,0 +1,7 @@
+oauth:
+  authentik:
+
+  github:
+
+local:
+  enabled: true

@@ -1,0 +1,11 @@
+services:
+  docker-manager:
+    build:
+      context: .
+      dockerfile: dockerfile.development
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ENV=${ENV}
+    ports:
+      - "3000:3000"

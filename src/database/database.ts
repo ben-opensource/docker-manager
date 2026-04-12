@@ -33,12 +33,22 @@ const createNewUser = (username: string, password: string, access: Access = "USE
     access
   })
 }
+
 const userAlreadyExists = (username: string) => {
   return database.users.filter(u => u.username == username).length > 0;
 }
+
+const validateUser = (username: string, password: string) => {
+  const users = database.users.filter(u => u.username == username && u.password == password);
+  if (users.length == 0)
+    return false;
+  return true;
+}
+
 export {
   getUser,
   getUserCount,
   createNewUser,
-  userAlreadyExists
+  userAlreadyExists,
+  validateUser
 }

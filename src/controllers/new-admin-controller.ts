@@ -1,5 +1,4 @@
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
-import { path, __dirname } from "@/util/util.js";
 
 import { createNewUser, userAlreadyExists } from "@/database/database.js";
 

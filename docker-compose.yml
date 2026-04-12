@@ -7,5 +7,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - ENV=${ENV}
+      - SESSION_SECRET=${SESSION_SECRET}
     ports:
       - "3000:3000"

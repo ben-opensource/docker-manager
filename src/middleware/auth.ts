@@ -18,7 +18,10 @@ const requireNoUsers = (req: Req, res: Res, next: Next) => {
 }
 
 const requireLogin = (req: Req, res: Res, next: Next) => {
-  //todo
+  if (!req.session.loggedIn) {
+    res.redirect("/login");
+    return;
+  }
   next();
 }
 
@@ -32,11 +35,16 @@ const requireStackAccess = (req: Req, res: Res, next: Next) => {
   //if not admin -> check if access to the stack
   next();
 }
+const requireNotLoggedIn = (req: Req, res: Res, next: Next) => {
+  //todo
+  next();
+}
 
 export {
   newAdminIfNoUsers,
   requireNoUsers,
   requireAdmin,
   requireLogin,
+  requireNotLoggedIn,
   requireStackAccess
 }

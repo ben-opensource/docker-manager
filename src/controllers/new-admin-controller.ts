@@ -3,7 +3,6 @@ import { Request as Req, Response as Res, NextFunction as Next } from "express";
 import { createNewUser, userAlreadyExists } from "@/database/database.js";
 
 const newAdmin = ( req: Req, res: Res) => {
-  // res.sendFile(path.join(__dirname, 'views', 'new-admin.html'));
   res.render("new-admin", {
     title: "New Admin",
     errorMessage: "",

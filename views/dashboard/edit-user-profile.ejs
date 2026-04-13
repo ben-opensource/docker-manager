@@ -1,0 +1,22 @@
+<form action="/dashboard/edit-profile" method="post">
+  <label>
+    Username:
+    <input type="text" name="username" value="<%= username %>">
+  </label>
+  <label>
+    Current Password:
+    <input type="password" name="currentPassword" value="<%= lastEnteredPassword %>">
+  </label>
+  <label>
+    New Password:
+    <input type="password" name="newPassword" value="<%= lastEnteredNewPassword %>">
+  </label>
+  <label>
+    Confirm New Password:
+    <input type="password" name="confirmNewPassword" value="<%= lastEnteredConfirmPassword %>">
+  </label>
+  <button type="submit">Update Profile</button>
+  <% if (errorMessage) { %>
+    <p><%= errorMessage %></p>
+  <% } %>
+</form>

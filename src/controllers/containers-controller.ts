@@ -6,7 +6,6 @@ const containers = async (req: Req, res: Res) => {
   res.render("dashboard/containers", {
     title: "Containers",
     layout: "dashboard/layout",
-    userAccess: req.session.access,
     containers: containers?.map(c => ({ 
       name: c.Names[0].replace('/',''),
       id: c.Id, 

@@ -4,20 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%- title %></title>
+  <style>
+    :root {
+      padding: 0;
+      margin: 0;
+    }
+    .dashboard-body {
+      display: grid;
+      grid-template-columns: 1fr 5fr;
+      grid-template-rows: 1fr auto;
+      padding: 0;
+      margin: 0;
+    }
+    .dashboard-nav {
+      position: relative;
+      background: #bbb;
+      grid-row: 1 / -1;
+      grid-column: 1;
+      min-height: 100vh;
+    }
+    .dashboard-nav li {
+      list-style: none;
+    }
+    .dashboard-nav a {
+      text-decoration: none;
+    }
+    .dashboard-main {
+      grid-column: 2;
+      padding: 1em;
+      
+    }
+    .dashboard-logout-link {
+      position: absolute;
+      bottom: 0;
+      padding: 1em;
+    }
+  </style>
 </head>
-<body>
-  <h1>Docker Manager - <%= title %></h1>
-  <nav>
+<body class="dashboard-body">
+  <nav class="dashboard-nav">
     <h2 style="display:none">User</h2>
     <ul>
-      <li><a href="/">Dashboard</a></li>
+      <li><a href="/dashboard">Dashboard</a></li>
       <li><a href="">Stacks</a></li>
       <li><a href="/dashboard/containers">Containers</a></li>
       <li><a href="">Images</a></li>
       <li><a href="">Networks</a></li>
       <li><a href="">Volumes</a></li>
     </ul>
-    <% if (userAccess == "ADMIN") { %>
+    <% if (session.access == "ADMIN") { %>
       <h2>Admin Only</h2>
       <ul>
         <li><a href="">New Stack</a></li>
@@ -27,9 +62,11 @@
         <li><a href="">Config</a></li>
       </ul>
     <% } %>
-    <a href="">logout</a>
+    <a class="dashboard-profile-link" href="/dashboard/profile">Profile</a>
+    <a class="dashboard-logout-link" href="/logout">logout</a>
   </nav>
-  <main>
+  <main class="dashboard-main">
+    <h1 class="dashboard-h1">Docker Manager - <%= title %></h1>
     <%- body %>
   </main>
 </body>

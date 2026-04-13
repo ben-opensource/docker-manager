@@ -4,7 +4,7 @@ const docker = new Docker({
   socketPath: "/var/run/docker.sock",
 });
 
-const getContainers = async (userId: number, userAccess: Access = "USER") => {
+const getContainers = async (userId: number, userAccess: Access = "USER_READ_ONLY") => {
   try {
     const stacks = getStacksForUser(userId);
     const containers = await docker.listContainers({ all: true });
@@ -16,7 +16,7 @@ const getContainers = async (userId: number, userAccess: Access = "USER") => {
     return null;
   }
 }
-const getContainerCount = async (userId: number, userAccess: Access = "USER") => {
+const getContainerCount = async (userId: number, userAccess: Access = "USER_READ_ONLY") => {
   const containers = await getContainers(userId, userAccess);
   return containers?.length ?? 0;
 }

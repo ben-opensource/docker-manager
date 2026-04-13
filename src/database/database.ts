@@ -1,9 +1,10 @@
-type Access = "ADMIN" | "USER" | "NONE";
+
 type UserData = {
   id: number,
   username: string,
   password: string,
-  access: Access
+  access: Access,
+  requireSignIn?: boolean
 }
 const database: { users: UserData[], stackAccess: { userId: number, stackName: string }[]} = {
   users: [
@@ -11,7 +12,7 @@ const database: { users: UserData[], stackAccess: { userId: number, stackName: s
       id: 1,
       username: "admin",
       password: "123",
-      access: "USER"
+      access: "ADMIN"
     }
   ],
   stackAccess: [
@@ -31,13 +32,19 @@ const getUser = (id: number) => {
   return users[0];
 }
 
-const createNewUser = (username: string, password: string, access: Access = "USER") => {
+const createNewUser = (username: string, password: string, access: Access = "USER_READ_ONLY") => {
   database.users.push({
     id: database.users.length + 1,
     username,
     password,
     access
   })
+}
+const updateUser = (id: number, username: string, password: string, access: Access = "USER_READ_ONLY") => {
+  const user = database.users.filter(u => u.id == id)[0];
+  user.username = username;
+  user.password = password;
+  user.access = access;
 }
 
 const userAlreadyExists = (username: string) => {
@@ -62,5 +69,6 @@ export {
   userAlreadyExists,
   validateUser,
   getStacksForUser,
-  Access
+  Access,
+  updateUser
 }

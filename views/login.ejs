@@ -8,7 +8,7 @@
       value="<%= username %>"
     >
   </label>
-  <label>Password: <input type="password" name="password" id="password"></label>
+  <label>Password: <input type="password" name="password" id="password" value="<%= password %>"></label>
   <button type="submit">Login</button>
   <% if (errorMessage) { %>
     <p><%= errorMessage %></p>

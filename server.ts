@@ -29,7 +29,7 @@ app.use(session({
 //********** routers **********
 app.use("/", noAuthRouter);
 app.use("/", requireLoginRouter);
-app.use("/admin", requireAdminRouter);
+app.use("/", requireAdminRouter);
 
 
 //********** start **********

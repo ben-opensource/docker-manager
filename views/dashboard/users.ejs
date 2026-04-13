@@ -1,0 +1,7 @@
+<% users.forEach(u => { %>
+  <%= u.username %>
+  <%= u.access %>
+<% }) %>
+<% if (session.access == "ADMIN") { %>
+  <a href="/dashboard/new-user">New User</a>
+<% } %>

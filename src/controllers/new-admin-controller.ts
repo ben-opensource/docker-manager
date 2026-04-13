@@ -6,7 +6,9 @@ const newAdmin = ( req: Req, res: Res) => {
   res.render("new-admin", {
     title: "New Admin",
     errorMessage: "",
-    username: ""
+    username: "",
+    password: "",
+    confirmPassword: ""
   });
 }
 const newAdminPost = ( req: Req, res: Res) => {
@@ -14,7 +16,9 @@ const newAdminPost = ( req: Req, res: Res) => {
   const renderData = {
     title: "New Admin",
     errorMessage: "",
-    username
+    username,
+    password,
+    confirmPassword
   };
   if (password != confirmPassword) {
     res.render("new-admin", {

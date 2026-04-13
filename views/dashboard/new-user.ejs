@@ -1,4 +1,4 @@
-<form action="/new-admin" method="post">
+<form action="/dashboard/new-user" method="post">
   <label>
     Username: 
     <input 
@@ -10,6 +10,7 @@
   </label>
   <label>Password: <input type="password" name="password" id="password" value="<%= password %>"></label>
   <label>Confirm Password: <input type="password" name="confirmPassword" id="confirmPassword" value="<%= confirmPassword %>"></label>
+  <label>Access: <input type="text" name="access" id="access" value="<%= access %>"></label>
   <button type="submit">Create User</button>
   <% if (errorMessage) { %>
     <p><%= errorMessage %></p>

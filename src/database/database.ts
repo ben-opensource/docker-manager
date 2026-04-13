@@ -1,4 +1,3 @@
-
 type UserData = {
   id: number,
   username: string,
@@ -22,6 +21,9 @@ const database: { users: UserData[], stackAccess: { userId: number, stackName: s
     }
   ]
 };
+const getUsers = () => {
+  return database.users;
+}
 const getUserCount = () => {
   return database.users.length;
 }
@@ -70,5 +72,6 @@ export {
   validateUser,
   getStacksForUser,
   Access,
-  updateUser
+  updateUser,
+  getUsers
 }

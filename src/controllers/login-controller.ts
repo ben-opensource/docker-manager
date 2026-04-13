@@ -5,7 +5,8 @@ const login = (req: Req, res: Res) => {
   res.render("login", {
     title: "Login",
     errorMessage: "",
-    username: ""
+    username: "",
+    password: ""
   });
 }
 const loginPost = (req: Req, res: Res) => {
@@ -22,7 +23,8 @@ const loginPost = (req: Req, res: Res) => {
   res.render("login", {
     title: "Login",
     errorMessage: "Invalid Login!",
-    username: username
+    username,
+    password
   });
 }
 

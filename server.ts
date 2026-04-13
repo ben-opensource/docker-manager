@@ -6,6 +6,7 @@ import session from "express-session";
 import { loadConfig } from "@/config/config.js"
 import { requireLoginRouter } from "@/routes/requireLogin.js";
 import { noAuthRouter } from "@/routes/noAuth.js";
+import { requireAdminRouter } from "@/routes/requireAdmin.js";
 
 //********** init **********
 const app = express();
@@ -28,6 +29,7 @@ app.use(session({
 //********** routers **********
 app.use("/", noAuthRouter);
 app.use("/", requireLoginRouter);
+app.use("/admin", requireAdminRouter);
 
 
 //********** start **********

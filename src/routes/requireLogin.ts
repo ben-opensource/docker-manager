@@ -9,8 +9,6 @@ router.use(requireLogin);
 
 router.get("/dashboard", dashboard);
 router.get("/dashboard/containers", containers)
-router.get("/update-config", requireAdmin, (req: Req, res: Res) => {
 
-})
 
 export { router as requireLoginRouter }

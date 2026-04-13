@@ -1,0 +1,5 @@
+<h1>Containers</h1>
+<% containers.forEach(c => { %>
+  <%- include("./container-block.ejs", c) %>
+  <% console.log(c.name) %>
+<% }) %>

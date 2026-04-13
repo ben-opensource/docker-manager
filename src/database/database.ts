@@ -1,18 +1,24 @@
-type Access = "ADMIN" | "USER"
+type Access = "ADMIN" | "USER" | "NONE";
 type UserData = {
   id: number,
   username: string,
   password: string,
   access: Access
 }
-const database: { users: UserData[]} = {
+const database: { users: UserData[], stackAccess: { userId: number, stackName: string }[]} = {
   users: [
-    // {
-    //   id: 1,
-    //   username: "user1",
-    //   password: "password1",
-    //   access: "ADMIN"
-    // }
+    {
+      id: 1,
+      username: "admin",
+      password: "123",
+      access: "USER"
+    }
+  ],
+  stackAccess: [
+    {
+      userId: 1,
+      stackName: "docker-manager"
+    }
   ]
 };
 const getUserCount = () => {
@@ -38,11 +44,15 @@ const userAlreadyExists = (username: string) => {
   return database.users.filter(u => u.username == username).length > 0;
 }
 
-const validateUser = (username: string, password: string) => {
+const validateUser: (u:string,p:string)=>[Access,number|null] = (username: string, password: string) => {
   const users = database.users.filter(u => u.username == username && u.password == password);
   if (users.length == 0)
-    return false;
-  return true;
+    return ["NONE", null];
+  return [users[0].access, users[0].id ];
+}
+
+const getStacksForUser = (userId: number) => {
+  return database.stackAccess.filter(s => s.userId == userId).map(s => s.stackName);
 }
 
 export {
@@ -50,5 +60,7 @@ export {
   getUserCount,
   createNewUser,
   userAlreadyExists,
-  validateUser
+  validateUser,
+  getStacksForUser,
+  Access
 }

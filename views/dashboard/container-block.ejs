@@ -1,0 +1,32 @@
+<style>
+  .container-block-container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid;
+    padding: 1em;
+  }
+  .container-block-id {
+    font-size: 0.75em;
+  }
+
+  .container-block-details {
+    display: flex;
+    flex-direction: column;
+  }
+</style>
+<div class="container-block-container">
+  <span class="container-block-name"><%= name %></span>
+  <span class="container-block-id"><%= id %></span>
+  <span class="container-block-state"><%= state %></span>
+  <span class="container-block-status"><%= status %></span>
+  <details>
+    <div class="container-block-details">
+      <span class="container-block-image"><%= image %></span>
+      
+      <span class="container-block-ports"><%= JSON.stringify(ports) %></span>
+      <span class="container-block-networks"><%= JSON.stringify(networks) %></span>
+      <span class="container-block-stack"><%= JSON.stringify(stack) %></span>
+    </div>
+  </details>
+  
+</div>

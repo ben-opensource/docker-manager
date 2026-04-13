@@ -8,6 +8,7 @@ import { newAdminIfNoUsers, requireAdmin, requireLogin, requireNotLoggedIn, requ
 import { newAdmin, newAdminPost } from "@/controllers/new-admin-controller.js";
 import { login, loginPost } from "@/controllers/login-controller.js";
 import { dashboard } from "@/controllers/dashboard-controller.js";
+import { containers } from "@/controllers/containers-controller.js";
 
 //********** init **********
 const app = express();
@@ -39,6 +40,7 @@ app.post("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminPost);
 
 //dashboard
 app.get("/dashboard", requireLogin, dashboard);
+app.get("/dashboard/containers", requireLogin, containers)
 app.get("/update-config", requireLogin, requireAdmin, (req: Req, res: Res) => {
 
 })

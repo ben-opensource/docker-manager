@@ -5,6 +5,8 @@ const containers = async (req: Req, res: Res) => {
   const containers = await getContainers(req.session.userId ?? -1, req.session.access);
   res.render("dashboard/containers", {
     title: "Containers",
+    layout: "dashboard/layout",
+    userAccess: req.session.access,
     containers: containers?.map(c => ({ 
       name: c.Names[0].replace('/',''),
       id: c.Id, 
@@ -14,7 +16,6 @@ const containers = async (req: Req, res: Res) => {
       ports: c.Ports,
       networks: c.NetworkSettings.Networks,
       stack: c.Labels["com.docker.compose.project"] ?? "",
-
     })) ?? []
   });
 }

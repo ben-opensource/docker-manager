@@ -16,8 +16,8 @@ const getContainers = async (userId: number, userAccess: Access = "USER") => {
     return null;
   }
 }
-const getContainerCount = async (userId: number) => {
-  const containers = await getContainers(userId);
+const getContainerCount = async (userId: number, userAccess: Access = "USER") => {
+  const containers = await getContainers(userId, userAccess);
   return containers?.length ?? 0;
 }
 

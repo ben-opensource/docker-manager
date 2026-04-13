@@ -6,6 +6,29 @@
   <title><%- title %></title>
 </head>
 <body>
+  <h1>Docker Manager - <%= title %></h1>
+  <nav>
+    <h2 style="display:none">User</h2>
+    <ul>
+      <li><a href="/">Dashboard</a></li>
+      <li><a href="">Stacks</a></li>
+      <li><a href="/dashboard/containers">Containers</a></li>
+      <li><a href="">Images</a></li>
+      <li><a href="">Networks</a></li>
+      <li><a href="">Volumes</a></li>
+    </ul>
+    <% if (userAccess == "ADMIN") { %>
+      <h2>Admin Only</h2>
+      <ul>
+        <li><a href="">New Stack</a></li>
+        <li><a href="">New Image</a></li>
+        <li><a href="">New Network</a></li>
+        <li><a href="">Users</a></li>
+        <li><a href="">Config</a></li>
+      </ul>
+    <% } %>
+    <a href="">logout</a>
+  </nav>
   <main>
     <%- body %>
   </main>

@@ -5,7 +5,8 @@ const dashboard = async (req: Req, res: Res) => {
   res.render("dashboard/dashboard", {
     title: "Login",
     layout: "dashboard/layout",
-    containerCount: await getContainerCount(req.session.userId ?? -1)
+    containerCount: await getContainerCount(req.session.userId ?? -1, req.session.access),
+    userAccess: req.session.access
   });
 }
 

@@ -3,12 +3,9 @@ import bodyParser from "body-parser";
 import expressLayouts from "express-ejs-layouts";
 import session from "express-session";
 
-import { loadConfig, config } from "@/config/config.js"
-import { newAdminIfNoUsers, requireAdmin, requireLogin, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
-import { newAdmin, newAdminPost } from "@/controllers/new-admin-controller.js";
-import { login, loginPost } from "@/controllers/login-controller.js";
-import { dashboard } from "@/controllers/dashboard-controller.js";
-import { containers } from "@/controllers/containers-controller.js";
+import { loadConfig } from "@/config/config.js"
+import { requireLoginRouter } from "@/routes/requireLogin.js";
+import { noAuthRouter } from "@/routes/noAuth.js";
 
 //********** init **********
 const app = express();
@@ -28,22 +25,9 @@ app.use(session({
     saveUninitialized: false,
 }));
 
-
-//********** routes **********
-//login - new admin if no users exist
-app.get("/login", requireNotLoggedIn, newAdminIfNoUsers, login);
-app.post("/login", requireNotLoggedIn, newAdminIfNoUsers, loginPost);
-
-//new admin - only if no users exist
-app.get("/new-admin", requireNotLoggedIn, requireNoUsers, newAdmin);
-app.post("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminPost);
-
-//dashboard
-app.get("/dashboard", requireLogin, dashboard);
-app.get("/dashboard/containers", requireLogin, containers)
-app.get("/update-config", requireLogin, requireAdmin, (req: Req, res: Res) => {
-
-})
+//********** routers **********
+app.use("/", noAuthRouter);
+app.use("/", requireLoginRouter);
 
 
 //********** start **********

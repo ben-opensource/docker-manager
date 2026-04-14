@@ -1,4 +1,5 @@
 import { Access, validateUser } from "@/database/database.js";
+import { logLOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const login = (req: Req, res: Res) => {
@@ -17,6 +18,7 @@ const loginPost = (req: Req, res: Res) => {
     req.session.loggedIn = true;
     req.session.access = validUser;
     req.session.userId = userId;
+    logLOGIN(userId);
     res.redirect("/dashboard")
     return;
   }

@@ -15,3 +15,35 @@
     <p><%= errorMessage %></p>
   <% } %>
 </form>
+OR
+
+<form action="/load-backup" id="backup-form">
+  <input type="file" name="backup-file" id="backup-file" accept=".json">
+  <button type="submit">Load Backup</button>
+</form>
+<script>
+  document.querySelector("#backup-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const backupFile = document.querySelector("#backup-file").files[0];
+    if (!backupFile) return;
+
+    try {
+      const text = await backupFile.text();console.log(text)
+
+      //make sure its actually json
+      const jsonData = JSON.parse(text);console.log(jsonData)
+
+      const res = await fetch('/load-backup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+      });
+
+
+    } catch (error) {
+      console.error(error);
+    }
+  });
+</script>

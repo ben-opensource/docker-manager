@@ -1,0 +1,3 @@
+<% logs.forEach(l => { %>
+  <div><%= l.time %>: <%= l.type %>-<%= l.subType %> by User ID = <%= l.byUserId %> <%= l.data == "" ? "" : `(${l.data})` %></div>
+<% }) %>

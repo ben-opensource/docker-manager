@@ -8,11 +8,6 @@ import { requireLoginRouter } from "@/routes/requireLogin.js";
 import { noAuthRouter } from "@/routes/noAuth.js";
 import { requireAdminRouter } from "@/routes/requireAdmin.js";
 import { auth } from "express-openid-connect";
-import { Access } from "@/database/database.js";
-//import escape from "escape-html";
-
-// require('dotenv').config();
-// import dotenv from "dotenv";
 
 //********** init **********
 const app = express();
@@ -21,14 +16,29 @@ const PORT = 3000;
 loadConfig();
 
 //********** middleware **********
-app.use((req, res, next) => {
-  console.log("url: " +req.url);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log("url: " +req.url);
+//   next();
+// });
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressLayouts);
 app.set("view engine", "ejs");
+app.use(auth({
+    authRequired: false, 
+    auth0Logout: true,
+    secret: process.env.SESSION_SECRET,
+    baseURL: process.env.BASE_URL,
+    clientID: process.env.AUTH0_CLIENT_ID,
+    clientSecret: process.env.AUTH0_CLIENT_SECRET,
+    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+    routes: {
+      callback: "/oauth/callback",
+      login: "/oauth/login",
+      logout: "/oauth/logout"
+    },
+    idpLogout: true
+  }));
 app.use((req: Req, res: Res, next: Next) => {
   res.locals.middlewareData = {};
   next();

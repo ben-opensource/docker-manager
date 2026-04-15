@@ -28,7 +28,7 @@ const newUserPost = (req: Req, res: Res) => {
     errorMessage = "Username is already used!";
   } else if (password != confirmPassword) {
     errorMessage = "Passwords must match!"
-  } else if (![Access.ADMIN, Access.USER, Access.ADMIN_READ_ONLY, Access.USER_READ_ONLY].includes(access)) {
+  } else if (![''+Access.ADMIN, ''+Access.USER, ''+Access.ADMIN_READ_ONLY, ''+Access.USER_READ_ONLY].includes(access)) {
     errorMessage = "Invalid access role!";
   } else {
     createNewUser(username, password, access, loginsAllowed ?? LoginsAllowed.ALL);

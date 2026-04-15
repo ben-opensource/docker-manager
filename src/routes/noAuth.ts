@@ -1,84 +1,31 @@
-import express, { Request as Req, Response as Res, NextFunction as Next } from "express";
+import express from "express";
 
-import { login, loginPost, oauthController, oauthLogin } from "@/controllers/login-controller.js";
-import { newAdmin, newAdminPost } from "@/controllers/new-admin-controller.js";
+import * as loginController from "@/controllers/login-controller.js";
+import * as newAdminController from "@/controllers/new-admin-controller.js";
 import { deleteSession, newAdminIfNoUsers, requireLogin, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
-import { loadBackup } from "@/controllers/backups-controller.js";
-import { auth } from "express-openid-connect";
-import { database, getOauthUser } from "@/database/database.js";
+import * as backupsController from "@/controllers/backups-controller.js";
 
 const router = express.Router();
 
+//********** routes **********
 //login - new admin if no users exist
-router.get("/login", requireNotLoggedIn, newAdminIfNoUsers, login);
-router.post("/login", requireNotLoggedIn, newAdminIfNoUsers, loginPost);
+router.get("/login", requireNotLoggedIn, newAdminIfNoUsers, loginController.login);
+router.post("/login", requireNotLoggedIn, newAdminIfNoUsers, loginController.loginPost);
+router.get("/oauth/login", requireNotLoggedIn, loginController.oauthLogin);
+router.get("/oauth", requireNotLoggedIn, newAdminIfNoUsers, loginController.oauth);
+router.get("/oauth/oauth-success", loginController.oauthSuccess);
 
-const oauthRouter = express.Router();
-oauthRouter.use(auth({
-    authRequired: false, // set to true to require authentication for all routes
-    auth0Logout: true,
-    secret: process.env.SESSION_SECRET,
-    baseURL: process.env.BASE_URL,
-    clientID: process.env.AUTH0_CLIENT_ID,
-    clientSecret: process.env.AUTH0_CLIENT_SECRET,
-    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
-    routes: {
-      callback: "/oauth/callback",
-      login: "/login",
-      logout: "/oauth/logout"
-    },
-    idpLogout: true
-  }));
-oauthRouter.get("/oauth-logout", deleteSession, (req: Req, res: Res) => {
-  res.oidc.logout({
-    returnTo: "/login"
-  });
-});
-oauthRouter.get("/oauth", requireNotLoggedIn, newAdminIfNoUsers, oauthController);
-oauthRouter.get("/oauth/login", requireNotLoggedIn, oauthLogin);
-oauthRouter.get("/oauth/add-oauth", requireLogin, (req: Req, res: Res) => {
-  res.oidc.login({
-    returnTo: "/oauth/oauth-success",
-    authorizationParams: { screen_hint: 'signin', scope: "openid profile email" }
-  });
-});
-oauthRouter.get("/oauth/confirm-add-oauth", requireLogin, (req: Req, res: Res) => {
-  database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
-  res.oidc.logout({
-    returnTo: "/login"
-  });
-});
+//logout - logs out of oauth after deleteSession clears the local login
+router.get("/logout", deleteSession, loginController.logout);
 
-//done-cleanup: set all logout returnTo routes to /login -> if its still logged in, redirect to dashboard, else stay on login
-//done-cleanup: set all login routes to /oauth-success -> if still logged in, add oauth, if not logged in -> log in -> log out of auth2
-oauthRouter.get("/oauth/oauth-success", (req: Req, res: Res) => {
-  //console.log(req.oidc.user?.email)
-  if (req.session.loggedIn) {
-    database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
-  } else {
-    const user = getOauthUser(req?.oidc?.user?.sub ?? "");
-    if (user) {
-      req.session.access = user.access;
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      req.session.loggedIn = true;
-    } //todo-maybe - else if (oauthConnection.createOauth equals email) -> add oauth to account and update oauthConnection to have proper id and set oauthConnection.createOauth to ""
-  } //or
-    //admin allows 1 login attempt before oauth is disabled
-    //or
-    //best? - add option to disable username/password login per account
-  res.oidc.logout({
-    returnTo: "/login"
-  });
-});
-
-router.use("/", oauthRouter);
-
+//add oauth
+router.get("/oauth/add-oauth", requireLogin, loginController.oauth);
+router.get("/oauth/confirm-add-oauth", requireLogin, loginController.confirmAddOauth);
 
 //new admin - only if no users exist
-router.get("/new-admin", requireNotLoggedIn, requireNoUsers, newAdmin);
-router.post("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminPost);
+router.get("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminController.newAdmin);
+router.post("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminController.newAdminPost);
 
-router.post("/load-backup", requireNotLoggedIn, requireNoUsers, loadBackup);
+router.post("/load-backup", requireNotLoggedIn, requireNoUsers, backupsController.loadBackup);
 
 export { router as noAuthRouter }

@@ -1,5 +1,5 @@
 import { config } from "@/config/config.js";
-import { Access, getOauthUser, validateUser } from "@/database/database.js";
+import { Access, database, getOauthUser, validateUser } from "@/database/database.js";
 import { logLOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
@@ -35,7 +35,7 @@ const loginPost = (req: Req, res: Res) => {
   });
 }
 
-const oauthController = (req: Req, res: Res) => {
+const oauth = (req: Req, res: Res) => {
   res.oidc.login({
     returnTo: '/oauth/oauth-success',
     authorizationParams: { screen_hint: 'signin', scope: "openid profile email" },
@@ -56,9 +56,42 @@ const oauthLogin = (req: Req, res: Res) => {
   });
 }
 
+const confirmAddOauth = (req: Req, res: Res) => {
+  if (database.oauthConnections.filter(c => c.oauthClientId == req?.oidc.user!.sub).length == 0)
+    database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+  res.oidc.logout({
+    returnTo: "/login"
+  });
+}
+const oauthSuccess = (req: Req, res: Res) => {
+  if (req.session.loggedIn) {
+    database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+  } else {
+    const user = getOauthUser(req?.oidc?.user?.sub ?? "");
+    if (user) {
+      req.session.access = user.access;
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      req.session.loggedIn = true;
+    } 
+  }
+  res.oidc.logout({
+    returnTo: "/login"
+  });
+}
+
+const logout = (req: Req, res: Res) => {
+  res.oidc.logout({
+    returnTo: "/login"
+  });
+}
+
 export {
   login,
   loginPost,
-  oauthController,
-  oauthLogin
+  confirmAddOauth,
+  oauthLogin,
+  logout,
+  oauth,
+  oauthSuccess
 }

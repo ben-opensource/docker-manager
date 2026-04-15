@@ -4,6 +4,10 @@ import { logLOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const login = (req: Req, res: Res) => {
+  if (req.session.loggedIn) {
+    res.redirect("/dashboard");
+    return;
+  }
   res.render("login", {
     title: "Login",
     errorMessage: "",
@@ -33,7 +37,7 @@ const loginPost = (req: Req, res: Res) => {
 
 const oauthController = (req: Req, res: Res) => {
   res.oidc.login({
-    returnTo: '/oauth/login',
+    returnTo: '/oauth/oauth-success',
     authorizationParams: { screen_hint: 'signin' },
   });
 }

@@ -5,7 +5,7 @@ import { newAdmin, newAdminPost } from "@/controllers/new-admin-controller.js";
 import { deleteSession, newAdminIfNoUsers, requireLogin, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
 import { loadBackup } from "@/controllers/backups-controller.js";
 import { auth } from "express-openid-connect";
-import { database } from "@/database/database.js";
+import { database, getOauthUser } from "@/database/database.js";
 
 const router = express.Router();
 
@@ -29,26 +29,47 @@ oauthRouter.use(auth({
     },
     idpLogout: true
   }));
-oauthRouter.get("/oauth-logout", (req: Req, res: Res) => {
+oauthRouter.get("/oauth-logout", deleteSession, (req: Req, res: Res) => {
   res.oidc.logout({
-    returnTo: "/dashboard/logout"
+    returnTo: "/login"
   });
 });
 oauthRouter.get("/oauth", requireNotLoggedIn, newAdminIfNoUsers, oauthController);
 oauthRouter.get("/oauth/login", requireNotLoggedIn, oauthLogin);
 oauthRouter.get("/oauth/add-oauth", requireLogin, (req: Req, res: Res) => {
   res.oidc.login({
-    returnTo: "/oauth/confirm-add-oauth",
+    returnTo: "/oauth/oauth-success",
     authorizationParams: { screen_hint: 'signin' },
   });
 });
 oauthRouter.get("/oauth/confirm-add-oauth", requireLogin, (req: Req, res: Res) => {
   database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
   res.oidc.logout({
-    returnTo: "/dashboard"
+    returnTo: "/login"
   });
 });
+
+//done-cleanup: set all logout returnTo routes to /login -> if its still logged in, redirect to dashboard, else stay on login
+//done-cleanup: set all login routes to /oauth-success -> if still logged in, add oauth, if not logged in -> log in -> log out of auth2
+oauthRouter.get("/oauth/oauth-success", (req: Req, res: Res) => {
+  if (req.session.loggedIn) {
+    database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+  } else {
+    const user = getOauthUser(req?.oidc?.user?.sub ?? "");
+    if (user) {
+      req.session.access = user.access;
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      req.session.loggedIn = true;
+    }
+  }
+  res.oidc.logout({
+    returnTo: "/login"
+  });
+});
+
 router.use("/", oauthRouter);
+
 
 //new admin - only if no users exist
 router.get("/new-admin", requireNotLoggedIn, requireNoUsers, newAdmin);

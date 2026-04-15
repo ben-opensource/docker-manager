@@ -1,7 +1,5 @@
 oauth:
-  authentik:
-
-  github:
-
+  auth0:
+    
 local:
   enabled: true

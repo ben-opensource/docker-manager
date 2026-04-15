@@ -13,22 +13,33 @@ type LoginYmlConfig = {
   }
 }
 type LoginConfig = {
-  localUsersAllowed: boolean
+  localUsersAllowed: boolean,
+  oauthOptions: {
+    [key: string]: {
+
+    }
+  }
 }
 let config: {
-
+  login?: LoginConfig
 } = {};
 const loadLoginConfig = () => {
   let loginConfig: LoginConfig = {
-    localUsersAllowed: true
+    localUsersAllowed: true,
+    oauthOptions: {}
   };
   try {
     const fileContents = fs.readFileSync("./config/login.yml", "utf8");
     const data = yaml.load(fileContents) as LoginYmlConfig;
 
     loginConfig.localUsersAllowed = data.local?.enabled ?? true
+    loginConfig.oauthOptions = data.oauth ?? {}
+
+    config.login = loginConfig;
+    console.log(config.login)
   } catch (error) {
     console.error(error);
+    return;
   }
 }
 

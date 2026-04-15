@@ -1,4 +1,5 @@
-import { Access, validateUser } from "@/database/database.js";
+import { config } from "@/config/config.js";
+import { Access, getOauthUser, validateUser } from "@/database/database.js";
 import { logLOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
@@ -30,7 +31,32 @@ const loginPost = (req: Req, res: Res) => {
   });
 }
 
+const oauthController = (req: Req, res: Res) => {
+  res.oidc.login({
+    returnTo: '/oauth/login',
+    authorizationParams: { screen_hint: 'signin' },
+  });
+}
+const oauthSuccess = (req: Req, res: Res) => {
+  res.redirect("/oauth/login");
+}
+const oauthLogin = (req: Req, res: Res) => {
+  const user = getOauthUser(req?.oidc?.user?.sub ?? "");
+  if (!user) {
+    res.redirect("/oauth-logout");
+    return;
+  }
+  req.session.access = user.access;
+  req.session.userId = user.id;
+  req.session.username = user.username;
+  req.session.loggedIn = true;
+  res.redirect("/dashboard");
+}
+
 export {
   login,
-  loginPost
+  loginPost,
+  oauthController,
+  oauthSuccess,
+  oauthLogin
 }

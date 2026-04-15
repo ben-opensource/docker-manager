@@ -7,6 +7,11 @@ import { loadConfig } from "@/config/config.js"
 import { requireLoginRouter } from "@/routes/requireLogin.js";
 import { noAuthRouter } from "@/routes/noAuth.js";
 import { requireAdminRouter } from "@/routes/requireAdmin.js";
+import { auth } from "express-openid-connect";
+//import escape from "escape-html";
+
+// require('dotenv').config();
+// import dotenv from "dotenv";
 
 //********** init **********
 const app = express();
@@ -15,10 +20,15 @@ const PORT = 3000;
 loadConfig();
 
 //********** middleware **********
+app.use((req, res, next) => {
+  console.log("url: " +req.url);
+  next();
+});
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressLayouts);
 app.set("view engine", "ejs");
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET ?? "",
@@ -28,8 +38,8 @@ app.use(session({
 
 //********** routers **********
 app.use("/", noAuthRouter);
-app.use("/", requireLoginRouter);
-app.use("/", requireAdminRouter);
+app.use("/dashboard", requireLoginRouter);
+app.use("/dashboard", requireAdminRouter);
 
 
 //********** start **********

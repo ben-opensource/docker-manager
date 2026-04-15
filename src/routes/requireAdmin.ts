@@ -10,16 +10,16 @@ router.use(requireLogin);
 router.use(requireAdmin);
 router.use(passSessionToLayout);
 
-router.get("/dashboard/update-config", requireWriteAccess, (req: Req, res: Res) => {
+router.get("/update-config", requireWriteAccess, (req: Req, res: Res) => {
 
 });
-router.get("/dashboard/users", usersController);
-router.get("/dashboard/new-user", requireWriteAccess, newUser);
-router.post("/dashboard/new-user", requireWriteAccess, newUserPost);
+router.get("/users", usersController);
+router.get("/new-user", requireWriteAccess, newUser);
+router.post("/new-user", requireWriteAccess, newUserPost);
 
-router.get("/dashboard/logs", logs);
+router.get("/logs", logs);
 
 
-router.get("/dashboard/download-backup", requireWriteAccess, downloadBackup);
+router.get("/download-backup", requireWriteAccess, downloadBackup);
 
 export { router as requireAdminRouter }

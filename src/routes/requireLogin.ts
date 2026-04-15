@@ -19,11 +19,11 @@ router.get("/logout",
   deleteSession, 
   (req: Req, res: Res) => res.redirect("/login")
 );
-router.get("/dashboard", dashboard);
-router.get("/dashboard/profile", profile);
-router.get("/dashboard/edit-profile", editProfile);
-router.post("/dashboard/edit-profile", editProfilePost);
-router.get("/dashboard/containers", containers)
+router.get("/", dashboard);
+router.get("/profile", profile);
+router.get("/edit-profile", editProfile);
+router.post("/edit-profile", editProfilePost);
+router.get("/containers", containers)
 
 
 

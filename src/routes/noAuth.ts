@@ -1,10 +1,11 @@
 import express, { Request as Req, Response as Res, NextFunction as Next } from "express";
 
-import { login, loginPost, oauthController, oauthLogin, oauthSuccess } from "@/controllers/login-controller.js";
+import { login, loginPost, oauthController, oauthLogin } from "@/controllers/login-controller.js";
 import { newAdmin, newAdminPost } from "@/controllers/new-admin-controller.js";
-import { deleteSession, newAdminIfNoUsers, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
+import { deleteSession, newAdminIfNoUsers, requireLogin, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
 import { loadBackup } from "@/controllers/backups-controller.js";
 import { auth } from "express-openid-connect";
+import { database } from "@/database/database.js";
 
 const router = express.Router();
 
@@ -28,16 +29,25 @@ oauthRouter.use(auth({
     },
     idpLogout: true
   }));
-oauthRouter.get("/oauth-logout", deleteSession, (req: Req, res: Res, next: Next) => {
-  const logoutUrl = process.env.AUTH0_ISSUER_BASE_URL +
-    `/oidc/logout?client_id=${process.env.AUTH0_CLIENT_ID}` +
-    `&post_logout_redirect_uri=${encodeURIComponent(`${process.env.BASE_URL}/login`)}`;
-
-  res.redirect(logoutUrl);
+oauthRouter.get("/oauth-logout", (req: Req, res: Res) => {
+  res.oidc.logout({
+    returnTo: "/dashboard/logout"
+  });
 });
-oauthRouter.get("/test",(res:Res,req:Req)=>res.json("test"))
 oauthRouter.get("/oauth", requireNotLoggedIn, newAdminIfNoUsers, oauthController);
-oauthRouter.get("/oauth/login", oauthLogin);
+oauthRouter.get("/oauth/login", requireNotLoggedIn, oauthLogin);
+oauthRouter.get("/oauth/add-oauth", requireLogin, (req: Req, res: Res) => {
+  res.oidc.login({
+    returnTo: "/oauth/confirm-add-oauth",
+    authorizationParams: { screen_hint: 'signin' },
+  });
+});
+oauthRouter.get("/oauth/confirm-add-oauth", requireLogin, (req: Req, res: Res) => {
+  database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+  res.oidc.logout({
+    returnTo: "/dashboard"
+  });
+});
 router.use("/", oauthRouter);
 
 //new admin - only if no users exist

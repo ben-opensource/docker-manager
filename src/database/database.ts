@@ -31,11 +31,11 @@ const database: { users: UserData[], stackAccess: { userId: number, stackName: s
     }
   ],
   oauthConnections: [
-    {
-      oauthClientId: "google-oauth2|112872330911524780028",
-      userId: 1,
+    // {
+    //   oauthClientId: "google-oauth2|112872330911524780028",
+    //   userId: 1,
 
-    }
+    // }
   ]
 };
 const getUsers = () => {
@@ -111,6 +111,7 @@ const loadDbFromBackup = (data: any) => {
 }
 
 export {
+  database,
   getUser,
   getUserCount,
   createNewUser,

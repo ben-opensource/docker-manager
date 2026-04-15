@@ -37,9 +37,6 @@ const oauthController = (req: Req, res: Res) => {
     authorizationParams: { screen_hint: 'signin' },
   });
 }
-const oauthSuccess = (req: Req, res: Res) => {
-  res.redirect("/oauth/login");
-}
 const oauthLogin = (req: Req, res: Res) => {
   const user = getOauthUser(req?.oidc?.user?.sub ?? "");
   if (!user) {
@@ -50,13 +47,14 @@ const oauthLogin = (req: Req, res: Res) => {
   req.session.userId = user.id;
   req.session.username = user.username;
   req.session.loggedIn = true;
-  res.redirect("/dashboard");
+  res.oidc.logout({//dont actually stay logged in to auth0
+    returnTo: "/dashboard"
+  });
 }
 
 export {
   login,
   loginPost,
   oauthController,
-  oauthSuccess,
   oauthLogin
 }

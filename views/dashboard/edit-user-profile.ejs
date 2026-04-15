@@ -1,4 +1,4 @@
-<% if (["ADMIN","USER"].includes(session.access)) { %>
+<% if (middlewareData.hasWriteAccess) { %>
   <form action="/dashboard/edit-profile" method="post">
     <label>
       Username:

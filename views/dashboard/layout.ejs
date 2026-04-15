@@ -52,7 +52,7 @@
       <li><a href="">Networks</a></li>
       <li><a href="">Volumes</a></li>
     </ul>
-    <% if (session.access == "ADMIN") { %>
+    <% if (middlewareData.isAdmin) { %>
       <h2>Admin Only</h2>
       <ul>
         <li><a href="">New Stack</a></li>

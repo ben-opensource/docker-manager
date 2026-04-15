@@ -1,4 +1,4 @@
-import { updateUser, userAlreadyExists, validateUser } from "@/database/database.js";
+import { Access, updateUser, userAlreadyExists, validateUser } from "@/database/database.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const profile = (req: Req, res: Res) => {
@@ -38,10 +38,10 @@ const editProfilePost = (req: Req, res: Res) => {
     errorMessage = "New passwords must match!";
   } else {
     const [ access, userId ] = validateUser(req.session.username ?? "", currentPassword);
-    if (access == "NONE" || userId != req.session.userId) {
+    if (access == Access.NONE || userId != req.session.userId) {
       errorMessage = "Incorrect Login"
     } else {
-      updateUser(userId, username, newPassword, req.session.access ?? "USER_READ_ONLY");
+      updateUser(userId, username, newPassword, req.session.access ?? Access.USER_READ_ONLY);
       req.session.username = username;
       res.redirect("/dashboard/profile");
       return;

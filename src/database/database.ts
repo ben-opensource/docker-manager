@@ -1,6 +1,9 @@
 import { positiveIntOrNull, stringOrNull } from "./validation.js";
 
-const userRoles = ["ADMIN", "ADMIN_READ_ONLY", "USER", "USER_READ_ONLY"];
+const enum Access { ADMIN = 1, ADMIN_READ_ONLY = 2, USER = 3, USER_READ_ONLY = 4, NONE = 0 };
+const enum LoginsAllowed { ALL = 1, OAUTH_ONLY = 2, OAUTH_ONLY_IF_SET = 3, NONE = 0 };
+
+const userRoles = [Access.ADMIN, Access.ADMIN_READ_ONLY, Access.USER, Access.USER_READ_ONLY];
 
 type OauthConnection = {
   userId: number,
@@ -12,7 +15,8 @@ type UserData = {
   username: string,
   password: string,
   access: Access,
-  requireSignIn?: boolean
+  requireSignIn?: boolean,
+  loginsAllowed: LoginsAllowed
 }
 
 const database: { users: UserData[], stackAccess: { userId: number, stackName: string }[], oauthConnections: OauthConnection[]} = {
@@ -21,7 +25,8 @@ const database: { users: UserData[], stackAccess: { userId: number, stackName: s
       id: 1,
       username: "admin",
       password: "123",
-      access: "ADMIN",
+      access: Access.ADMIN,
+      loginsAllowed: LoginsAllowed.ALL
     }
   ],
   stackAccess: [
@@ -51,15 +56,16 @@ const getUser = (id: number) => {
   return users[0];
 }
 
-const createNewUser = (username: string, password: string, access: Access = "USER_READ_ONLY") => {
+const createNewUser = (username: string, password: string, access: Access = Access.USER_READ_ONLY, loginsAllowed = LoginsAllowed.ALL) => {
   database.users.push({
     id: database.users.length + 1,
     username,
     password,
-    access
+    access,
+    loginsAllowed
   })
 }
-const updateUser = (id: number, username: string, password: string, access: Access = "USER_READ_ONLY") => {
+const updateUser = (id: number, username: string, password: string, access: Access = Access.USER_READ_ONLY) => {
   const user = database.users.filter(u => u.id == id)[0];
   user.username = username;
   user.password = password;
@@ -70,19 +76,24 @@ const userAlreadyExists = (username: string) => {
   return database.users.filter(u => u.username == username).length > 0;
 }
 
-const validateUser: (u:string,p:string)=>[Access,number|null] = (username: string, password: string) => {
+const validateUser: (u:string,p:string)=>[Access,number|null,LoginsAllowed] = (username: string, password: string) => {
   const users = database.users.filter(u => u.username == username && u.password == password);
-  if (users.length == 0)
-    return ["NONE", null];
-  return [users[0].access, users[0].id ];
+  if (users.length > 0 && 
+    (
+      users[0].loginsAllowed == LoginsAllowed.ALL || 
+      (users[0].loginsAllowed == LoginsAllowed.OAUTH_ONLY_IF_SET && database.oauthConnections.filter(c => c.userId == users[0].id).length == 0)
+    ))
+    return [ users[0].access, users[0].id, users[0].loginsAllowed ?? LoginsAllowed.ALL ];
+  return [ Access.NONE, null, LoginsAllowed.NONE ];
+  
 }
 const getOauthUser = (oauthClientId: string) => {
-  const connections = database.oauthConnections.filter(c => c.oauthClientId == oauthClientId);console.log(1) //todo it stops here
+  const connections = database.oauthConnections.filter(c => c.oauthClientId == oauthClientId);
   if (connections.length == 0)
-    return null;console.log(2)
+    return null;
   const users = database.users.filter(u => u.id == connections[0].userId);
-  if (users.length == 0)
-    return null;console.log(3)
+  if (users.length == 0 || users[0].loginsAllowed == LoginsAllowed.NONE)
+    return null;
   return users[0];
 }
 
@@ -102,7 +113,7 @@ const loadDbFromBackup = (data: any) => {
       const id = positiveIntOrNull(user.id) 
       const username = stringOrNull(user.username, u => !userAlreadyExists(u));
       const password = stringOrNull(user.password);
-      const access = stringOrNull(user.access, a => userRoles.includes(a));
+      const access = positiveIntOrNull(user.access, a => userRoles.includes(a));
       if ([id, username, password, access].includes(null))
         continue;console.log(2)
       createNewUser(username as string, password as string, access as Access);
@@ -123,5 +134,7 @@ export {
   getUsers,
   getStackAccess,
   loadDbFromBackup,
-  getOauthUser
+  getOauthUser,
+  userRoles,
+  LoginsAllowed
 }

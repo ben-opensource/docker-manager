@@ -1,5 +1,5 @@
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
-import { getUser, getUserCount } from "@/database/database.js";
+import { Access, getUser, getUserCount } from "@/database/database.js";
 
 const deleteSession = (req: Req, res: Res, next: Next) => {
   req.session.destroy((err) => {
@@ -41,11 +41,12 @@ const requireNoUsers = (req: Req, res: Res, next: Next) => {
 }
 
 const requireLogin = (req: Req, res: Res, next: Next) => {
-  
   if (!req.session.loggedIn) {
     res.redirect("/login");
     return;
-  } else if (getUser(req.session.userId ?? -1)?.requireSignIn) {
+  } 
+  const user = getUser(req.session.userId ?? -1);
+  if (user?.requireSignIn) { //todo test later
     req.session.destroy((err) => {
       if (err) {
         console.log(err);
@@ -56,19 +57,21 @@ const requireLogin = (req: Req, res: Res, next: Next) => {
       return;
     });
   } else {
+    res.locals.middlewareData!.isAdmin = [Access.ADMIN, Access.ADMIN_READ_ONLY].includes(user!.access ?? 0);
+    res.locals.middlewareData!.hasWriteAccess = [Access.ADMIN, Access.USER].includes(user!.id);
     next();
   }
 }
 
 const requireAdmin = (req: Req, res: Res, next: Next) => {
-  if (["ADMIN", "ADMIN_READ_ONLY"].includes(req.session.access ?? "")) {
+  if ([Access.ADMIN, Access.ADMIN_READ_ONLY].includes(req.session.access ?? Access.NONE)) {
     next();
     return;
   }
   res.redirect("/dashboard");
 }
 const requireWriteAccess = (req: Req, res: Res, next: Next) => {
-  if (["USER", "ADMIN"].includes(req.session.access ?? "")) {
+  if ([Access.USER, Access.ADMIN].includes(req.session.access ?? Access.NONE)) {
     next();
     return;
   }

@@ -1,6 +1,6 @@
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
-import { createNewUser, userAlreadyExists } from "@/database/database.js";
+import { Access, createNewUser, userAlreadyExists } from "@/database/database.js";
 
 const newAdmin = ( req: Req, res: Res) => {
   res.render("new-admin", {
@@ -34,7 +34,7 @@ const newAdminPost = ( req: Req, res: Res) => {
     });
     return;
   }
-  createNewUser(username, password, "ADMIN")
+  createNewUser(username, password, Access.ADMIN)
   res.redirect("/login");
 }
 

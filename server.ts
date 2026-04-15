@@ -1,4 +1,4 @@
-import express, { Request as Req, Response as Res } from "express";
+import express, { Request as Req, Response as Res, NextFunction as Next } from "express";
 import bodyParser from "body-parser";
 import expressLayouts from "express-ejs-layouts";
 import session from "express-session";
@@ -8,6 +8,7 @@ import { requireLoginRouter } from "@/routes/requireLogin.js";
 import { noAuthRouter } from "@/routes/noAuth.js";
 import { requireAdminRouter } from "@/routes/requireAdmin.js";
 import { auth } from "express-openid-connect";
+import { Access } from "@/database/database.js";
 //import escape from "escape-html";
 
 // require('dotenv').config();
@@ -28,6 +29,10 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressLayouts);
 app.set("view engine", "ejs");
+app.use((req: Req, res: Res, next: Next) => {
+  res.locals.middlewareData = {};
+  next();
+});
 
 
 app.use(session({

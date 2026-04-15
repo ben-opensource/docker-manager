@@ -39,7 +39,7 @@ oauthRouter.get("/oauth/login", requireNotLoggedIn, oauthLogin);
 oauthRouter.get("/oauth/add-oauth", requireLogin, (req: Req, res: Res) => {
   res.oidc.login({
     returnTo: "/oauth/oauth-success",
-    authorizationParams: { screen_hint: 'signin' },
+    authorizationParams: { screen_hint: 'signin', scope: "openid profile email" }
   });
 });
 oauthRouter.get("/oauth/confirm-add-oauth", requireLogin, (req: Req, res: Res) => {
@@ -52,6 +52,7 @@ oauthRouter.get("/oauth/confirm-add-oauth", requireLogin, (req: Req, res: Res) =
 //done-cleanup: set all logout returnTo routes to /login -> if its still logged in, redirect to dashboard, else stay on login
 //done-cleanup: set all login routes to /oauth-success -> if still logged in, add oauth, if not logged in -> log in -> log out of auth2
 oauthRouter.get("/oauth/oauth-success", (req: Req, res: Res) => {
+  //console.log(req.oidc.user?.email)
   if (req.session.loggedIn) {
     database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
   } else {
@@ -61,8 +62,11 @@ oauthRouter.get("/oauth/oauth-success", (req: Req, res: Res) => {
       req.session.userId = user.id;
       req.session.username = user.username;
       req.session.loggedIn = true;
-    }
-  }
+    } //todo-maybe - else if (oauthConnection.createOauth equals email) -> add oauth to account and update oauthConnection to have proper id and set oauthConnection.createOauth to ""
+  } //or
+    //admin allows 1 login attempt before oauth is disabled
+    //or
+    //best? - add option to disable username/password login per account
   res.oidc.logout({
     returnTo: "/login"
   });

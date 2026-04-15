@@ -17,11 +17,11 @@ const login = (req: Req, res: Res) => {
 }
 const loginPost = (req: Req, res: Res) => {
   const { username, password } = req.body;
-  const [validUser, userId] = validateUser(username, password) ?? ["NONE", null];
-  if (validUser != "NONE" && userId != null) {
+  const [access, userId, loginsAllowed] = validateUser(username, password) ?? [Access.NONE, null];
+  if (userId != null && access != Access.NONE) {
     req.session.username = username;
     req.session.loggedIn = true;
-    req.session.access = validUser;
+    req.session.access = access;
     req.session.userId = userId;
     logLOGIN(userId);
     res.redirect("/dashboard")
@@ -38,7 +38,7 @@ const loginPost = (req: Req, res: Res) => {
 const oauthController = (req: Req, res: Res) => {
   res.oidc.login({
     returnTo: '/oauth/oauth-success',
-    authorizationParams: { screen_hint: 'signin' },
+    authorizationParams: { screen_hint: 'signin', scope: "openid profile email" },
   });
 }
 const oauthLogin = (req: Req, res: Res) => {

@@ -2,6 +2,6 @@
   <%= u.username %>
   <%= u.access %>
 <% }) %>
-<% if (session.access == "ADMIN") { %>
+<% if (middlewareData.isAdmin && middlewareData.hasWriteAccess) { %>
   <a href="/dashboard/new-user">New User</a>
 <% } %>

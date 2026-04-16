@@ -4,10 +4,10 @@ import expressLayouts from "express-ejs-layouts";
 import session from "express-session";
 
 import { loadConfig } from "@/config/config.js"
-import { requireLoginRouter } from "@/routes/requireLogin.js";
-import { noAuthRouter } from "@/routes/noAuth.js";
-import { requireAdminRouter } from "@/routes/requireAdmin.js";
 import { auth } from "express-openid-connect";
+import noAuthRouter from "@/routes/noAuth.js";
+import requireLoginRouter from "@/routes/requireLogin.js";
+import requireAdminRouter from "@/routes/requireAdmin.js";
 
 //********** init **********
 const app = express();

@@ -1,31 +1,27 @@
+import * as authMiddleware from "@/middleware/auth.js";
 import express from "express";
-
-import * as loginController from "@/controllers/login-controller.js";
-import * as newAdminController from "@/controllers/new-admin-controller.js";
-import { deleteSession, newAdminIfNoUsers, requireLogin, requireNotLoggedIn, requireNoUsers } from "@/middleware/auth.js";
+import * as authController from "@/controllers/authController.js";
 import * as backupsController from "@/controllers/backups-controller.js";
 
-const router = express.Router();
+const noAuthRouter = express.Router();
 
 //********** routes **********
-//login - new admin if no users exist
-router.get("/login", requireNotLoggedIn, newAdminIfNoUsers, loginController.login);
-router.post("/login", requireNotLoggedIn, newAdminIfNoUsers, loginController.loginPost);
-router.get("/oauth/login", requireNotLoggedIn, loginController.oauthLogin);
-router.get("/oauth", requireNotLoggedIn, newAdminIfNoUsers, loginController.oauth);
-router.get("/oauth/oauth-success", loginController.oauthSuccess);
+const loginRequirementMiddleware = [ authMiddleware.requireNotLoggedIn, authMiddleware.newAdminIfNoUsers];
+noAuthRouter.get("/login", loginRequirementMiddleware, authController.login);
+noAuthRouter.post("/login", loginRequirementMiddleware, authController.loginMiddlewarePost, authController.finalizeLogin);
+noAuthRouter.get("/oauth/login", loginRequirementMiddleware, authController.oauthLoginMiddleware, authController.finalizeLogin);
+noAuthRouter.get("/oauth", loginRequirementMiddleware, authController.oauthLogin);
+noAuthRouter.get("/oauth/oauth-success", authController.oauthSuccess);
 
-//logout - logs out of oauth after deleteSession clears the local login
-router.get("/logout", deleteSession, loginController.logout);
+noAuthRouter.get("/oauth/add-oauth", authMiddleware.requireLogin, authController.oauthLogin);
+noAuthRouter.get("/oauth/confirm-add-oauth", authMiddleware.requireLogin, authController.oauthSuccess);
 
-//add oauth
-router.get("/oauth/add-oauth", requireLogin, loginController.oauth);
-router.get("/oauth/confirm-add-oauth", requireLogin, loginController.confirmAddOauth);
+noAuthRouter.get("/logout", authMiddleware.deleteSession, authController.oauthLogout);
 
-//new admin - only if no users exist
-router.get("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminController.newAdmin);
-router.post("/new-admin", requireNotLoggedIn, requireNoUsers, newAdminController.newAdminPost);
+const newAdminMiddleware = [ authMiddleware.requireNotLoggedIn, authMiddleware.requireNoUsers ];
+noAuthRouter.get("/new-admin", newAdminMiddleware, authController.newAdmin);
+noAuthRouter.post("/new-admin", newAdminMiddleware, authController.newAdminPost);
 
-router.post("/load-backup", requireNotLoggedIn, requireNoUsers, backupsController.loadBackup);
+noAuthRouter.post("/load-backup", authMiddleware.requireNotLoggedIn, authMiddleware.requireNoUsers, backupsController.loadBackup);
 
-export { router as noAuthRouter }
+export default noAuthRouter;

@@ -1,24 +1,20 @@
+import * as authMiddleware from "@/middleware/auth.js";
 import express from "express";
-
-import { containers } from "@/controllers/containers-controller.js";
-import { dashboard } from "@/controllers/dashboard-controller.js";
-import { requireLogin } from "@/middleware/auth.js";
-import { editProfile, editProfilePost, profile } from "@/controllers/profile-controller.js";
 import { passSessionToLayout } from "@/middleware/util.js";
+import * as dashboardController from "@/controllers/dashboard-controller.js";
+import * as profileController from "@/controllers/profile-controller.js";
+import * as containerController from "@/controllers/containers-controller.js"
 
-const router = express.Router();
-
-//********** middleware **********
-router.use(requireLogin);
-router.use(passSessionToLayout);
-
-//********** routes **********
-router.get("/", dashboard);
-router.get("/profile", profile);
-router.get("/edit-profile", editProfile);
-router.post("/edit-profile", editProfilePost);
-router.get("/containers", containers)
+const requireLoginRouter = express.Router();
+requireLoginRouter.use(authMiddleware.requireLogin);
+requireLoginRouter.use(passSessionToLayout);
 
 
 
-export { router as requireLoginRouter }
+requireLoginRouter.get("/", dashboardController.dashboard);
+requireLoginRouter.get("/profile", profileController.profile);
+requireLoginRouter.get("/edit-profile", profileController.editProfile);
+requireLoginRouter.post("/edit-profile", profileController.editProfilePost);
+requireLoginRouter.get("/containers", containerController.containers);
+
+export default requireLoginRouter;

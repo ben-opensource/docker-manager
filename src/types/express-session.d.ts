@@ -5,7 +5,8 @@ declare module "express-session" {
     username?: string;
     userId?: number;
     loggedIn?: bool,
-    access: Access
+    access: Access,
+    requireSignIn?: boolean
   }
 }
 //declare module "express-session"

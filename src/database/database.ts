@@ -87,6 +87,16 @@ const validateUser: (u:string,p:string)=>[Access,number|null,LoginsAllowed] = (u
   return [ Access.NONE, null, LoginsAllowed.NONE ];
   
 }
+const getUserFromLogin = (username: string, password: string) => {
+  const users = database.users.filter(u => u.username == username && u.password == password);
+  if (users.length > 0 && 
+    (
+      users[0].loginsAllowed == LoginsAllowed.ALL || 
+      (users[0].loginsAllowed == LoginsAllowed.OAUTH_ONLY_IF_SET && database.oauthConnections.filter(c => c.userId == users[0].id).length == 0)
+    ))
+    return users[0];
+  return null;
+}
 const getOauthUser = (oauthClientId: string) => {
   const connections = database.oauthConnections.filter(c => c.oauthClientId == oauthClientId);
   if (connections.length == 0)
@@ -136,5 +146,6 @@ export {
   loadDbFromBackup,
   getOauthUser,
   userRoles,
-  LoginsAllowed
+  LoginsAllowed,
+  getUserFromLogin
 }

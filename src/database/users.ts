@@ -1,4 +1,5 @@
 import { db } from "./db.js";
+import { logADD_OAUTH } from "./logger.js";
 
 export const enum Access { ADMIN = 1, ADMIN_READ_ONLY = 2, USER = 3, USER_READ_ONLY = 4, NONE = 0 }; //update in schema and delete .db file when changing
 export const enum LoginsAllowed { ALL = 1, OAUTH_ONLY = 2, OAUTH_ONLY_IF_SET = 3, NONE = 0 }; //update in schema and delete .db file when changing
@@ -107,9 +108,11 @@ export const addOauthConnection = (data: OauthConnection ) => {
       return AddOauthResponseCodes.CONNECTION_EXISTS;
     db.prepare("INSERT INTO oauthConnections (user_id, oauth_client_id) VALUES (?, ?)")
       .run(data.userId, data.oauthClientId);
+      logADD_OAUTH(data.userId, data.oauthClientId);
     return AddOauthResponseCodes.CONNECTION_CREATED;
   } catch (err) {
     console.error(err);
+    logADD_OAUTH(data.userId, data.oauthClientId, (err as Error).name);
     return AddOauthResponseCodes.ADD_OAUTH_ERROR;
   }
 }

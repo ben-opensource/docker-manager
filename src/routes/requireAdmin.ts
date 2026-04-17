@@ -1,8 +1,8 @@
-import { downloadBackup } from "@/controllers/backups-controller.js";
-import { logs } from "@/controllers/logs-controller.js";
+import { downloadBackup } from "@/controllers/backupsController.js";
+import { logs } from "@/controllers/logsController.js";
 import * as authMiddleware from "@/middleware/auth.js";
 import { passSessionToLayout } from "@/middleware/util.js";
-import * as usersController from "@/controllers/users-controller.js";
+import * as usersController from "@/controllers/usersController.js";
 import express from "express";
 
 const requireAdminRouter = express.Router();

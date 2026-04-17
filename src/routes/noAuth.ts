@@ -1,7 +1,7 @@
 import * as authMiddleware from "@/middleware/auth.js";
 import express from "express";
 import * as authController from "@/controllers/authController.js";
-import * as backupsController from "@/controllers/backups-controller.js";
+import * as backupsController from "@/controllers/backupsController.js";
 
 const noAuthRouter = express.Router();
 
@@ -14,7 +14,7 @@ const newAdminMiddleware = [ authMiddleware.requireNotLoggedIn, authMiddleware.r
 noAuthRouter.get("/login", loginRequirementMiddleware, authController.login);
 noAuthRouter.post("/login", loginRequirementMiddleware, authController.loginMiddlewarePost, authController.finalizeLogin);
 //oauth login
-noAuthRouter.get("/oauth/login", loginRequirementMiddleware, authController.oauthLoginMiddleware, authController.finalizeLogin);
+//noAuthRouter.get("/oauth/login", loginRequirementMiddleware, authController.oauthLoginMiddleware, authController.finalizeLogin);
 noAuthRouter.get("/oauth", loginRequirementMiddleware, authController.oauthLogin);
 noAuthRouter.get("/oauth/oauth-success", authController.oauthSuccess);
 //add oauth

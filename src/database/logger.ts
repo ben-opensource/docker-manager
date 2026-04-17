@@ -46,7 +46,7 @@ const getTime = () => new Date().toLocaleTimeString();
 
 type AccountLog = {
   type: "ACCOUNT",
-  subType: "LOGIN" | "LOGOUT" | "NEW_USER" | "EDIT_USER" | "CHANGE_USER_ACCESS" | "FAILED_LOGIN" | "DELETE_USER"
+  subType: "LOGIN" | "OAUTH_LOGIN" | "ADD_OAUTH" | "LOGOUT" | "NEW_USER" | "EDIT_CURRENT_USER" | "EDIT_USER" | "CHANGE_USER_ACCESS" | "FAILED_LOGIN" | "DELETE_USER"
 }
 type ContainerLog = {
   type: "CONTAINER",
@@ -60,27 +60,75 @@ type LogData = {
   id: number,
   time: string,
   byUserId: number
-  data: string
+  data: string,
+  success: boolean
 } & (AccountLog | ContainerLog | ComposeLog);
 const tempLogTable: LogData[] = [];
 const addLog = (log: Omit<LogData, "time" | "id">) => {
   tempLogTable.push({...log, time: getTime(), id: tempLogTable.length + 1} as LogData);
 }
 
-const logLOGIN = (userId: number) => {
+const logNEW_USER = (username: string, error = '') => {
+  addLog({
+    type: "ACCOUNT",
+    subType: "NEW_USER",
+    byUserId: -1,
+    data: `username:${username}${error != '' ? ";error:" + error : ''}`,
+    success: error == ''
+  });
+}
+const logLOGIN = (userId: number, error = '') => {
   addLog({
     type: "ACCOUNT",
     subType: "LOGIN",
     byUserId: userId,
-    data: ""
+    data: `${error != '' ? "error:" + error : ''}`,
+    success: error == ''
   });
 }
-const logLOGOUT = (userId: number) => {
+const logOAUTH_LOGIN = (userId: number, oauthId: string, error = '') => {
+  addLog({
+    type: "ACCOUNT",
+    subType: "OAUTH_LOGIN",
+    byUserId: userId,
+    data: `oauthId:${oauthId}${error != '' ? ";error:" + error : ''}`,
+    success: error == ''
+  });
+}
+const logADD_OAUTH = (userId: number, oauthId: string, error = '') => {
+  addLog({
+    type: "ACCOUNT",
+    subType: "ADD_OAUTH",
+    byUserId: userId,
+    data: `oauthId:${oauthId}${error != '' ? ";error:" + error : ''}`,
+    success: error == ''
+  });
+}
+const logLOGOUT = (userId: number, error = '') => {
   addLog({
     type: "ACCOUNT",
     subType: "LOGOUT",
     byUserId: userId,
-    data: ""
+    data: `${error != '' ? "error:" + error : ''}`,
+    success: error == ''
+  });
+}
+const logEDIT_CURRENT_USER = (userId: number, error = '') => {
+  addLog({
+    type: "ACCOUNT",
+    subType: "EDIT_CURRENT_USER",
+    byUserId: userId,
+    data: `${error != '' ? "error:" + error : ''}`,
+    success: error == ''
+  });
+}
+const logEDIT_USER = (userId: number, error = '') => {
+  addLog({
+    type: "ACCOUNT",
+    subType: "EDIT_USER",
+    byUserId: userId,
+    data: `${error != '' ? "error:" + error : ''}`,
+    success: error == ''
   });
 }
 
@@ -91,5 +139,10 @@ const getLogs = (startId: number, count: number) => {
 export {
   logLOGIN,
   logLOGOUT,
-  getLogs
+  getLogs,
+  logOAUTH_LOGIN,
+  logADD_OAUTH,
+  logNEW_USER,
+  logEDIT_USER,
+  logEDIT_CURRENT_USER
 }

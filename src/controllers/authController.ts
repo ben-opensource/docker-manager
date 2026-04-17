@@ -1,5 +1,5 @@
 import { Access, addUser, addOauthConnection, getUserFromOauth, getUserFromLogin, LoginsAllowed, oauthConnectionExists, userExists } from "@/database/users.js";
-import { logLOGIN } from "@/database/logger.js";
+import { logLOGIN, logNEW_USER, logOAUTH_LOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const logout = (req: Req, res: Res) => {
@@ -39,13 +39,12 @@ const finalizeLogin = (req: Req, res: Res) => {
     returnTo: "/dashboard"
   });
 }
-const oauthLoginMiddleware = (req: Req, res: Res) => {
+const oauthLoginMiddleware = (req: Req, res: Res, next: Next) => {
   const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
-  if (!user || user.access == Access.NONE) {
-    res.redirect("/oauth-logout");
-    return;
-  }
+  if (!user || user.access == Access.NONE)
+    return res.redirect("/oauth-logout")
   res.locals.user = user;
+  next();
 }
 const oauthLogin = (req: Req, res: Res) => {
   res.oidc.login({
@@ -56,7 +55,6 @@ const oauthLogin = (req: Req, res: Res) => {
 const oauthSuccess = (req: Req, res: Res) => {
   if (req.session.loggedIn) {
     if (!oauthConnectionExists(req?.oidc.user!.sub ?? 0))
-      //database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
       addOauthConnection({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
   } else {
     const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
@@ -65,6 +63,7 @@ const oauthSuccess = (req: Req, res: Res) => {
       req.session.userId = user.id;
       req.session.username = user.username;
       req.session.loggedIn = true;
+      logOAUTH_LOGIN(user.id, req?.oidc?.user?.sub);
     } 
   }
   res.oidc.logout({
@@ -95,21 +94,18 @@ const newAdminPost = ( req: Req, res: Res) => {
     password,
     confirmPassword
   };
-  if (password != confirmPassword) {
-    res.render("new-admin", {
+  if (password != confirmPassword)
+    return res.render("new-admin", {
       ...renderData,
       errorMessage: "Passwords don't match!"
     });
-    return;
-  }
-  if (userExists(username)) {
-    res.render("new-admin", {
+  if (userExists(username))
+    return res.render("new-admin", {
       ...renderData,
       errorMessage: "Username is already used!"
     });
-    return;
-  }
-  addUser({ username, password, access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL })
+  addUser({ username, password, access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL });
+  logNEW_USER(username);
   res.redirect("/login");
 }
 

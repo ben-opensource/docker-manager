@@ -44,8 +44,7 @@ const editProfilePost = (req: Req, res: Res) => {
     } else {
       updateUser({id: user.id, username, password: newPassword, access: req.session.access ?? Access.USER_READ_ONLY, loginsAllowed: LoginsAllowed.ALL /** todo change */});
       req.session.username = username;
-      res.redirect("/dashboard/profile");
-      return;
+      return res.redirect("/dashboard/profile");
     }
   }
   res.render("dashboard/edit-user-profile", {

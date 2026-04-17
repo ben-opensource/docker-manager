@@ -5,7 +5,7 @@ services:
       dockerfile: dockerfile.development
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      #- ./logs:/app/logs
+      - ./data:/app/data
     environment:
       - ENV=${ENV}
       - SESSION_SECRET=${SESSION_SECRET}

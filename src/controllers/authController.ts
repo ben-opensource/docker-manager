@@ -1,4 +1,4 @@
-import { Access, createNewUser, database, getOauthUser, getUserFromLogin, userAlreadyExists } from "@/database/database.js";
+import { Access, addUser, addOauthConnection, getUserFromOauth, getUserFromLogin, LoginsAllowed, oauthConnectionExists, userExists } from "@/database/users.js";
 import { logLOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
@@ -40,7 +40,7 @@ const finalizeLogin = (req: Req, res: Res) => {
   });
 }
 const oauthLoginMiddleware = (req: Req, res: Res) => {
-  const user = getOauthUser(req?.oidc?.user?.sub ?? "");
+  const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
   if (!user || user.access == Access.NONE) {
     res.redirect("/oauth-logout");
     return;
@@ -55,10 +55,11 @@ const oauthLogin = (req: Req, res: Res) => {
 }
 const oauthSuccess = (req: Req, res: Res) => {
   if (req.session.loggedIn) {
-    if (database.oauthConnections.filter(c => c.oauthClientId == req?.oidc.user!.sub).length == 0)
-      database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+    if (!oauthConnectionExists(req?.oidc.user!.sub ?? 0))
+      //database.oauthConnections.push({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
+      addOauthConnection({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
   } else {
-    const user = getOauthUser(req?.oidc?.user?.sub ?? "");
+    const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
     if (user) {
       req.session.access = user.access;
       req.session.userId = user.id;
@@ -101,14 +102,14 @@ const newAdminPost = ( req: Req, res: Res) => {
     });
     return;
   }
-  if (userAlreadyExists(username)) {
+  if (userExists(username)) {
     res.render("new-admin", {
       ...renderData,
       errorMessage: "Username is already used!"
     });
     return;
   }
-  createNewUser(username, password, Access.ADMIN)
+  addUser({ username, password, access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL })
   res.redirect("/login");
 }
 

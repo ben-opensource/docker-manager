@@ -1,4 +1,4 @@
-import { getStackAccess, getUsers } from "@/database/database.js";
+import { getStackAccess, getUsers } from "@/database/users.js";
 
 
 const getBackup = () => {

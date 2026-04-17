@@ -1,4 +1,4 @@
-import { Access, updateUser, userAlreadyExists, validateUser } from "@/database/database.js";
+import { Access, getUserFromLogin, LoginsAllowed, updateUser, userExists} from "@/database/users.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const profile = (req: Req, res: Res) => {
@@ -21,7 +21,7 @@ const editProfile = (req: Req, res: Res) => {
 const editProfilePost = (req: Req, res: Res) => {
   const { username, currentPassword, newPassword, confirmNewPassword } = req.body;
   let errorMessage = "";
-  if (userAlreadyExists(username)) {
+  if (userExists(username)) {
     errorMessage = "Username is already used!";
   } else if ([currentPassword, newPassword, confirmNewPassword].includes("") && [currentPassword, newPassword, confirmNewPassword].filter(p => p != "").length > 0) {
     switch ("") {
@@ -37,11 +37,12 @@ const editProfilePost = (req: Req, res: Res) => {
   } else if (newPassword != confirmNewPassword) {
     errorMessage = "New passwords must match!";
   } else {
-    const [ access, userId ] = validateUser(req.session.username ?? "", currentPassword);
-    if (access == Access.NONE || userId != req.session.userId) {
+    //const [ access, userId ] = validateUser(req.session.username ?? "", currentPassword);
+    const user = getUserFromLogin(req.session.username ?? '_', currentPassword)
+    if (!user || user.access == Access.NONE || user.id != req.session.userId) {
       errorMessage = "Incorrect Login"
     } else {
-      updateUser(userId, username, newPassword, req.session.access ?? Access.USER_READ_ONLY);
+      updateUser({id: user.id, username, password: newPassword, access: req.session.access ?? Access.USER_READ_ONLY, loginsAllowed: LoginsAllowed.ALL /** todo change */});
       req.session.username = username;
       res.redirect("/dashboard/profile");
       return;

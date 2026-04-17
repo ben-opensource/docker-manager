@@ -1,5 +1,5 @@
 import Docker from "dockerode";
-import { Access, getStacksForUser } from "./database.js";
+import { Access, getStacksForUser } from "./users.js";
 const docker = new Docker({
   socketPath: "/var/run/docker.sock",
 });

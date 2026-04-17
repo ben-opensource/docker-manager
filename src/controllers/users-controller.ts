@@ -1,4 +1,5 @@
-import { Access, createNewUser, getUsers, LoginsAllowed, userAlreadyExists } from "@/database/database.js";
+import { Access, addUser, LoginsAllowed, userExists } from "@/database/users.js";
+import { getUsers } from "@/database/users.js";
 import { Request as Req, Response as Res, NextFunction as next } from "express";
 
 const users = (req: Req, res: Res) => {
@@ -24,14 +25,14 @@ const newUser = (req: Req, res: Res) => {
 const newUserPost = (req: Req, res: Res) => {
   let errorMessage = "";
   const { username, password, confirmPassword, access, loginsAllowed } = req.body;
-  if (userAlreadyExists(username)) {
+  if (userExists(username)) {
     errorMessage = "Username is already used!";
   } else if (password != confirmPassword) {
     errorMessage = "Passwords must match!"
   } else if (![''+Access.ADMIN, ''+Access.USER, ''+Access.ADMIN_READ_ONLY, ''+Access.USER_READ_ONLY].includes(access)) {
     errorMessage = "Invalid access role!";
   } else {
-    createNewUser(username, password, access, loginsAllowed ?? LoginsAllowed.ALL);
+    addUser({ username, password, access, loginsAllowed: loginsAllowed ?? LoginsAllowed.ALL });
     res.redirect("/dashboard/users");
     return;
   }

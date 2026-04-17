@@ -3,17 +3,24 @@ import bodyParser from "body-parser";
 import expressLayouts from "express-ejs-layouts";
 import session from "express-session";
 
-import { loadConfig } from "@/config/config.js"
+//import { loadConfig } from "@/config/config.js"
 import { auth } from "express-openid-connect";
 import noAuthRouter from "@/routes/noAuth.js";
 import requireLoginRouter from "@/routes/requireLogin.js";
 import requireAdminRouter from "@/routes/requireAdmin.js";
+import { initializeDatabase } from "@/database/db.js";
+import { addUser, getUserById, getUserCount, LoginsAllowed } from "@/database/users.js";
+import { Access } from "@/database/users.js";
 
 //********** init **********
 const app = express();
 const PORT = 3000;
 
-loadConfig();
+//loadConfig();
+initializeDatabase();
+// console.log(getUserById(1))
+//addUser({ username: "test123", password: "123", access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL })
+// console.log(getUserById(1))
 
 //********** middleware **********
 // app.use((req, res, next) => {

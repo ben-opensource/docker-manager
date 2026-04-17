@@ -1,5 +1,6 @@
-import { Access, getUser, getUserCount } from "@/database/database.js";
+import { Access, getUserCount } from "@/database/users.js";
 import { logLOGOUT } from "@/database/logger.js";
+import { getUserById } from "@/database/users.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
 const logoutIfForced = ( req: Req, res: Res, next: Next) => {
@@ -33,8 +34,12 @@ const requireLogin = (req: Req, res: Res, next: Next) => {
     res.redirect("/login");
     return;
   } 
-  const user = getUser(req.session.userId ?? -1);
-  res.locals.middlewareData!.isAdmin = [Access.ADMIN, Access.ADMIN_READ_ONLY].includes(user!.access ?? 0);
+  const user = getUserById(req.session.userId ?? -1);
+  if (!user) {
+    res.redirect("/logout");
+    return;
+  } 
+  res.locals.middlewareData!.isAdmin = [Access.ADMIN, Access.ADMIN_READ_ONLY].includes(user!.access ?? Access.NONE);
   res.locals.middlewareData!.hasWriteAccess = [Access.ADMIN, Access.USER].includes(user!.id);
   next();
 }

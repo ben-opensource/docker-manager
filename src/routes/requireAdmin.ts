@@ -7,21 +7,19 @@ import express from "express";
 
 const requireAdminRouter = express.Router();
 
+//********** middleware **********
 requireAdminRouter.use(authMiddleware.requireLogin);
 requireAdminRouter.use(authMiddleware.requireAdmin);
 requireAdminRouter.use(passSessionToLayout);
 
 //********** routes **********
-// requireAdminRouter.get("/update-config", requireWriteAccess, (req: Req, res: Res) => {
-//   //todo? do i even teed a config.yaml
-//   res.status(404);
-// });
+//users
 requireAdminRouter.get("/users", usersController.users);
 requireAdminRouter.get("/new-user", authMiddleware.requireWriteAccess, usersController.newUser);
 requireAdminRouter.post("/new-user", authMiddleware.requireWriteAccess, usersController.newUserPost);
-
+//logs
 requireAdminRouter.get("/logs", logs);
-
+//backups
 requireAdminRouter.get("/download-backup", authMiddleware.requireWriteAccess, downloadBackup);
 
 export default requireAdminRouter;

@@ -1,13 +1,14 @@
 import { Access, getUserFromLogin, LoginsAllowed, updateUser, userExists} from "@/database/users.js";
+import { Validator } from "@/middleware/validator.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
 
-const profile = (req: Req, res: Res) => {
+export const profile = (req: Req, res: Res) => {
   res.render("dashboard/user-profile", {
     title: "Profile",
     layout: "dashboard/layout"
   });
 }
-const editProfile = (req: Req, res: Res) => {
+export const editProfile = (req: Req, res: Res) => {
   res.render("dashboard/edit-user-profile", {
     title: "Edit Profile",
     layout: "dashboard/layout",
@@ -18,48 +19,27 @@ const editProfile = (req: Req, res: Res) => {
     lastEnteredConfirmPassword: ""
   });
 }
-const editProfilePost = (req: Req, res: Res) => {
-  const { username, currentPassword, newPassword, confirmNewPassword } = req.body;
-  let errorMessage = "";
-  if (userExists(username)) {
-    errorMessage = "Username is already used!";
-  } else if ([currentPassword, newPassword, confirmNewPassword].includes("") && [currentPassword, newPassword, confirmNewPassword].filter(p => p != "").length > 0) {
-    switch ("") {
-      case currentPassword:
-        errorMessage = "Current password is empty!";
-        break;
-      case newPassword:
-        errorMessage = "New password is empty!";
-        break;
-      case confirmNewPassword:
-        errorMessage = "New password must be confirmed!";
-    }
-  } else if (newPassword != confirmNewPassword) {
-    errorMessage = "New passwords must match!";
-  } else {
-    //const [ access, userId ] = validateUser(req.session.username ?? "", currentPassword);
-    const user = getUserFromLogin(req.session.username ?? '_', currentPassword)
-    if (!user || user.access == Access.NONE || user.id != req.session.userId) {
-      errorMessage = "Incorrect Login"
-    } else {
-      updateUser({id: user.id, username, password: newPassword, access: req.session.access ?? Access.USER_READ_ONLY, loginsAllowed: LoginsAllowed.ALL /** todo change */});
-      req.session.username = username;
-      return res.redirect("/dashboard/profile");
-    }
-  }
-  res.render("dashboard/edit-user-profile", {
-    title: "Edit Profile",
-    layout: "dashboard/layout",
-    username,
-    errorMessage,
-    lastEnteredPassword: currentPassword,
-    lastEnteredNewPassword: newPassword,
-    lastEnteredConfirmPassword: confirmNewPassword
-  });
-}
 
-export {
-  profile, 
-  editProfile,
-  editProfilePost
-}
+export const editProfilePost = [
+  new Validator((req,res) => {
+    res.render("dashboard/edit-user-profile", {
+      title: "Edit Profile",
+      layout: "dashboard/layout",
+      username: req.body.username,
+      errorMessage: res.locals.validatorError,
+      lastEnteredPassword: req.body.currentPassword,
+      lastEnteredNewPassword: req.body.newPassword,
+      lastEnteredConfirmPassword: req.body.confirmNewPassword
+    });
+  }).body("username").notEmptyString("Invalid username").custom("Username is already used", (u,req,res) => u === req.session.username || !userExists(u))
+  .setProp("currentPassword").notEmptyString("Invalid password").custom("Invalid login", (p,req,res) => getUserFromLogin(req.session.username ?? '_',p) !== null)
+  .setProp("newPassword").notEmptyString("Invalid new password")
+  .setProp("confirmNewPassword").custom("New passwords must match", (c,req) => c === req.body.newPassword)
+  .getMiddleware(),
+  (req:Req,res:Res) => {
+    const { username, newPassword } = req.body;
+    updateUser({id: req.session.userId!, username, password: newPassword, access: req.session.access ?? Access.USER_READ_ONLY, loginsAllowed: LoginsAllowed.ALL /** todo change */});
+    req.session.username = username;
+    return res.redirect("/dashboard/profile");
+  }
+]

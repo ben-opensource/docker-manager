@@ -61,10 +61,10 @@ const oauthLogin = (req: Req, res: Res) => {
 }
 const oauthSuccess = (req: Req, res: Res) => {
   if (req.session.loggedIn) {
-    if (!oauthConnectionExists(req?.oidc.user!.sub ?? 0))
+    if (!oauthConnectionExists(req?.oidc.user!.sub ?? ''))
       addOauthConnection({ oauthClientId: req?.oidc.user!.sub, userId: req.session.userId! });
   } else {
-    const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
+    const user = getUserFromOauth(req?.oidc?.user?.sub ?? '');
     if (user) {
       req.session.access = user.access;
       req.session.userId = user.id;

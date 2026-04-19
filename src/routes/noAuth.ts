@@ -12,9 +12,8 @@ const newAdminMiddleware = [ authMiddleware.requireNotLoggedIn, authMiddleware.r
 //********** routes **********
 //normal login
 noAuthRouter.get("/login", loginRequirementMiddleware, authController.login);
-noAuthRouter.post("/login", loginRequirementMiddleware, authController.loginMiddlewarePost, authController.finalizeLogin);
+noAuthRouter.post("/login", loginRequirementMiddleware, authController.loginPost);
 //oauth login
-//noAuthRouter.get("/oauth/login", loginRequirementMiddleware, authController.oauthLoginMiddleware, authController.finalizeLogin);
 noAuthRouter.get("/oauth", loginRequirementMiddleware, authController.oauthLogin);
 noAuthRouter.get("/oauth/oauth-success", authController.oauthSuccess);
 //add oauth

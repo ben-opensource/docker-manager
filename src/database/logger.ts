@@ -1,5 +1,7 @@
 // import fs from "fs";
 
+import { db } from "./db.js";
+
 // type AccountLog = { 
 //   category: "LOGIN" | "FORCE_LOGOUT" | "NEW_USER" | "EDIT_USER" | "CHANGE_USER_ACCESS" | "FAILED_LOGIN",
 //   data: string,
@@ -50,11 +52,15 @@ type AccountLog = {
 }
 type ContainerLog = {
   type: "CONTAINER",
-  subType: "STOP" | "START" | "DELETE" | "RESTART"
+  subType: "STOP" | "START" | "DELETE" | "RESTART" | "GET"
 }
 type ComposeLog = {
   type: "COMPOSE",
   subType: "UP" | "DOWN"
+}
+type LogFailure = {
+  type: "LOG",
+  subType: "FAILURE"
 }
 type LogData = {
   id: number,
@@ -62,10 +68,10 @@ type LogData = {
   byUserId: number
   data: string,
   success: boolean
-} & (AccountLog | ContainerLog | ComposeLog);
-const tempLogTable: LogData[] = [];
+} & (LogFailure | AccountLog | ContainerLog | ComposeLog);
 const addLog = (log: Omit<LogData, "time" | "id">) => {
-  tempLogTable.push({...log, time: getTime(), id: tempLogTable.length + 1} as LogData);
+  db.prepare("INSERT INTO logs (time, byUserId, data, success, type, subType) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(getTime(), log.byUserId, log.data, log.success ? "true" : "false", log.type, log.subType);
 }
 
 const logNEW_USER = (username: string, error = '') => {
@@ -132,8 +138,18 @@ const logEDIT_USER = (userId: number, error = '') => {
   });
 }
 
+const logGET_CONTAINERS = (error = '') => {
+  addLog({
+    type: "CONTAINER",
+    subType: "GET",
+    byUserId: -1,
+    data: `${error != '' ? "error:" + error : ''}`,
+    success: error == ''
+  });
+}
+
 const getLogs = (startId: number, count: number) => {
-  return tempLogTable.filter(l => l.id >= startId && l.id < startId + count);
+  return (db.prepare("SELECT time, byUserId, data, success, type, subType FROM logs").all() as {success: string}[]).map(l => ({...l, success: l.success == "true"})) ?? [];
 }
 
 export {
@@ -144,5 +160,6 @@ export {
   logADD_OAUTH,
   logNEW_USER,
   logEDIT_USER,
-  logEDIT_CURRENT_USER
+  logEDIT_CURRENT_USER,
+  logGET_CONTAINERS
 }

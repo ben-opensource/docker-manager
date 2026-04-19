@@ -10,7 +10,19 @@
   </label>
   <label>Password: <input type="password" name="password" id="password" value="<%= password %>"></label>
   <label>Confirm Password: <input type="password" name="confirmPassword" id="confirmPassword" value="<%= confirmPassword %>"></label>
-  <label>Access: <input type="text" name="access" id="access" value="<%= access %>"></label>
+  <!-- <label>Access: <input type="text" name="access" id="access" value="<%= access %>"></label> -->
+  <select name="access" id="access">
+    <option value="ADMIN">admin</option>
+    <option value="USER">user</option>
+    <option value="ADMIN_READ_ONLY">admin - read only</option>
+    <option value="USER_READ_ONLY" selected>user - read only</option>
+  </select>
+  <select name="loginsAllowed" id="loginsAllowed">
+    <option value="ALL" selected>all</option>
+    <option value="OAUTH_ONLY">oauth only</option>
+    <option value="OAUTH_ONLY_IF_SET">oauth only - if set</option>
+    <option value="NONE">none</option>
+  </select>
   <button type="submit">Create User</button>
   <% if (errorMessage) { %>
     <p><%= errorMessage %></p>

@@ -1,5 +1,6 @@
 import Docker from "dockerode";
 import { Access, getStacksForUser } from "./users.js";
+import { logGET_CONTAINERS } from "./logger.js";
 const docker = new Docker({
   socketPath: "/var/run/docker.sock",
 });
@@ -13,6 +14,7 @@ const getContainers = async (userId: number, userAccess: Access = Access.USER_RE
     }
     return containers.filter(c => stacks.includes(c.Labels["com.docker.compose.project"] ?? ""));
   } catch (err) {
+    logGET_CONTAINERS(' ');
     return null;
   }
 }

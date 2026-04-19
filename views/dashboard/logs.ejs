@@ -2,7 +2,7 @@
   .logs-table {
     display: grid;
     justify-items: stretch;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 0.5fr 2fr 0.5fr 3fr;
     width: 100%;
     gap: 0;
   }
@@ -11,13 +11,13 @@
   <span>Time</span>
   <span>Success</span>
   <span>Type</span>
-  <span>Done By User (Id)</span>
+  <span>Done By User (ID)</span>
   <span>Data</span>
   <% logs.forEach(l => { %>
     <span style="padding:0.5em;border-top:1px solid"><%= l.time %></span> 
     <span style="padding:0.5em;border-left:1px solid;border-top:1px solid"><%= l.success ? "yes" : "no" %></span>
     <span style="padding:0.5em;border-left:1px solid;border-top:1px solid"><%= l.type %> - <%= l.subType %></span>
-    <span style="padding:0.5em;border-left:1px solid;border-top:1px solid"><%= l.byUserId %></span> 
+    <span style="padding:0.5em;border-left:1px solid;border-top:1px solid"><%= l.byUserId == -1 ? "N/A" : l.byUserId %></span> 
     <span style="padding:0.5em;border-left:1px solid;border-top:1px solid"><%= l.data == "" ? "" : `(${l.data})` %></span>
   <% }) %>
 </div>

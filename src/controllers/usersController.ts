@@ -1,5 +1,5 @@
 import { logNEW_USER } from "@/database/logger.js";
-import { Access, addUser, LoginsAllowed, userExists } from "@/database/users.js";
+import { Access, accessToCode, addUser, LoginsAllowed, loginsAllowedToCode, userExists } from "@/database/users.js";
 import { getUsers } from "@/database/users.js";
 import { Request as Req, Response as Res, NextFunction as next } from "express";
 
@@ -32,11 +32,11 @@ const newUserPost = (req: Req, res: Res) => {
   } else if (password != confirmPassword) {
     errorMessage = "Passwords must match!";
     logNEW_USER(username, "passwords don't match");
-  } else if (![''+Access.ADMIN, ''+Access.USER, ''+Access.ADMIN_READ_ONLY, ''+Access.USER_READ_ONLY].includes(access)) {
+  } else if (!accessToCode[access] || accessToCode[access] == Access.NONE) {
     errorMessage = "Invalid access role!";
     logNEW_USER(username, "invalid access role");
   } else {
-    addUser({ username, password, access, loginsAllowed: loginsAllowed ?? LoginsAllowed.ALL });
+    addUser({ username, password, access: accessToCode[access] ?? Access.NONE, loginsAllowed: loginsAllowedToCode[loginsAllowed] ?? LoginsAllowed.ALL });
     logNEW_USER(username);
     return res.redirect("/dashboard/users");
   }

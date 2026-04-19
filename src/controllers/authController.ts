@@ -1,10 +1,11 @@
 import { Access, addUser, addOauthConnection, getUserFromOauth, getUserFromLogin, LoginsAllowed, oauthConnectionExists, userExists } from "@/database/users.js";
 import { logLOGIN, logNEW_USER, logOAUTH_LOGIN } from "@/database/logger.js";
 import { Request as Req, Response as Res, NextFunction as Next } from "express";
+import { Validator } from "@/middleware/validator.js";
 
-const logout = (req: Req, res: Res) => {
-  req.session.requireSignIn = false;
-}
+// const logout = (req: Req, res: Res) => {
+//   req.session.requireSignIn = false;
+// }
 const login = (req: Req, res: Res) => {
   res.render("login", {
     title: "Login",
@@ -13,32 +14,38 @@ const login = (req: Req, res: Res) => {
     password: ""
   });
 }
-const loginMiddlewarePost = (req: Req, res: Res, next: Next) => {
-  const { username, password } = req.body;
-  const user = getUserFromLogin(username, password);
-  if (user && user.access != Access.NONE) {
+
+export const loginPost = [
+  new Validator((req,res)=>{
+    logLOGIN(-1, `invalid login attempt-username:${req.body.username},password:${req.body.password}`);
+    res.render("login", {
+      title: "Login",
+      errorMessage: res.locals.validatorError,
+      username: req.body.username,
+      password: req.body.password
+    });
+  }).body("username").notEmptyString("Invalid username")
+  .setProp("password").notEmptyString("Invalid password")
+  .custom("Invalid login", (value,req,res) => {
+    const user = getUserFromLogin(req.body.username, req.body.password);
+    if (!user || user.access == Access.NONE) 
+      return false;
     res.locals.user = user;
-    next();
-    return;
+    return true;
+  }).getMiddleware(),
+  (req: Req, res: Res) => {
+    const { username, access, id } = res.locals.user
+    req.session.username = username;
+    req.session.loggedIn = true;
+    req.session.access = access;
+    req.session.userId = id;
+    logLOGIN(id);
+    res.oidc.logout({//dont actually stay logged in to auth0
+      returnTo: "/dashboard"
+    });
   }
-  res.render("login", {
-    title: "Login",
-    errorMessage: "Invalid Login!",
-    username,
-    password
-  });
-}
-const finalizeLogin = (req: Req, res: Res) => {
-  const { username, access, id } = res.locals.user
-  req.session.username = username;
-  req.session.loggedIn = true;
-  req.session.access = access;
-  req.session.userId = id;
-  logLOGIN(id);
-  res.oidc.logout({//dont actually stay logged in to auth0
-    returnTo: "/dashboard"
-  });
-}
+]
+
 const oauthLoginMiddleware = (req: Req, res: Res, next: Next) => {
   const user = getUserFromOauth(req?.oidc?.user?.sub ?? "");
   if (!user || user.access == Access.NONE)
@@ -85,38 +92,34 @@ const newAdmin = ( req: Req, res: Res) => {
     confirmPassword: ""
   });
 }
-const newAdminPost = ( req: Req, res: Res) => {
-  const { username, password, confirmPassword } = req.body;
-  const renderData = {
-    title: "New Admin",
-    errorMessage: "",
-    username,
-    password,
-    confirmPassword
-  };
-  if (password != confirmPassword)
+
+export const newAdminPost = [
+  new Validator((req,res)=> {
     return res.render("new-admin", {
-      ...renderData,
-      errorMessage: "Passwords don't match!"
+      title: "New Admin",
+      username: req.body.username,
+      password: req.body.password,
+      confirmPassword: req.body.confirmPassword,
+      errorMessage: res.locals.validatorError
     });
-  if (userExists(username))
-    return res.render("new-admin", {
-      ...renderData,
-      errorMessage: "Username is already used!"
-    });
-  addUser({ username, password, access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL });
-  logNEW_USER(username);
-  res.redirect("/login");
-}
+  }).body("username").notEmptyString("Invalid username")
+    .setProp("password").notEmptyString("Invalid password")
+    .setProp("confirmPassword").notEmptyString("Invalid password confirmation")
+    .custom("Passwords don't match", (value,req,res) => req.body.password === req.body.confirmPassword)
+    .custom("Username already exists", (value,req,res) => !userExists(req.body.username))
+    .getMiddleware(),
+  (req: Req, res: Res) => {
+    addUser({ username:req.body.username, password:req.body.password, access: Access.ADMIN, loginsAllowed: LoginsAllowed.ALL });
+    logNEW_USER(req.body.username);
+    res.redirect("/login");
+  }
+]
 
 export {
   login,
-  loginMiddlewarePost,
-  finalizeLogin,
   oauthLoginMiddleware,
   oauthLogin,
   oauthSuccess,
   oauthLogout,
   newAdmin,
-  newAdminPost
 }

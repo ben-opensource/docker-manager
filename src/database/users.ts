@@ -1,7 +1,20 @@
 import { db } from "./db.js";
 import { logADD_OAUTH } from "./logger.js";
 
+export const accessToCode: {[key: string]: number} = {
+  ADMIN: 1,
+  ADMIN_READ_ONLY: 2,
+  USER: 3,
+  USER_READ_ONLY: 4,
+  NONE: 0
+} as const;
 export const enum Access { ADMIN = 1, ADMIN_READ_ONLY = 2, USER = 3, USER_READ_ONLY = 4, NONE = 0 }; //update in schema and delete .db file when changing
+export const loginsAllowedToCode: {[key: string]: number} = {
+  ALL: 1,
+  OAUTH_ONLY: 2,
+  OAUTH_ONLY_IF_SET: 3,
+  NONE: 0
+} as const;
 export const enum LoginsAllowed { ALL = 1, OAUTH_ONLY = 2, OAUTH_ONLY_IF_SET = 3, NONE = 0 }; //update in schema and delete .db file when changing
 
 export const userRoles = [Access.ADMIN, Access.ADMIN_READ_ONLY, Access.USER, Access.USER_READ_ONLY];
@@ -87,7 +100,7 @@ export const getUserFromLogin = (username: string, password: string) => {
 }
 export const getUserFromOauth = (oauthId: string) => {
   try {
-    return (db.prepare("SELECT users.id, users.username, users.access, users.requireSignIn, users.loginsAllowed FROM users JOIN oauthConnections WHERE oauthConnections.oauth_client_id = ? LIMIT 1").get(oauthId) as UserData) ?? null;
+    return (db.prepare("SELECT users.id, users.username, users.access, users.requireSignIn, users.loginsAllowed FROM users JOIN oauthConnections ON oauthConnections.user_id = users.id WHERE oauthConnections.oauth_client_id = ? LIMIT 1").get(oauthId) as UserData) ?? null;
   } catch (err) {
     console.error(err);
     return null;

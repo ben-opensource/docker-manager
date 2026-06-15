@@ -1,0 +1,37 @@
+{
+  "name": "docker-manager",
+  "version": "1.0.0",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsx server.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "dockerode": "^4.0.10",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "escape-html": "^1.0.3",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-openid-connect": "^2.20.1",
+    "express-session": "^1.19.0",
+    "js-yaml": "^4.1.1",
+    "sqlite3": "^6.0.1",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/express-ejs-layouts": "^2.5.4",
+    "@types/express-session": "^1.18.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}

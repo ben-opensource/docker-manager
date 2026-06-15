@@ -1,0 +1,64 @@
+:root {
+  --body-bg-color: #ffffff;
+  --text-color: #111827;
+  --card-bg: #f3f4f6;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --primary-blue: #2496ED; /* Docker Identity Blue */
+  --btn-hover: #1a74ba;
+  --sidebar-border: #e5e7eb;
+
+  color: var(--text-color);
+}
+
+.page-dark-theme {
+  --body-bg-color: #111827;
+  --text-color: #f9fafb;
+  --card-bg: #1f2937;
+  --input-bg: #374151;
+  --input-border: #4b5563;
+  --sidebar-border: #374151;
+}
+
+body {
+  background-color: var(--body-bg-color);
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+}
+
+.theme-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 0.5rem;
+  width: 2rem;
+  height: 1rem;
+  border: 1px solid;
+  border-radius: 25% / 50%;
+  background-color: white;
+}
+.theme-toggle-circle {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+  background-color: black;
+  transition: margin 1s ease;
+}
+.page-dark-theme .theme-toggle-circle {
+  margin-left: auto;
+}
+
+.navbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 15%;
+  background: var(--card-bg);
+  border-right: 1px solid var(--sidebar-border);
+}
+.dashboard-main {
+  margin-left: 15%;
+  width: 100%;
+}

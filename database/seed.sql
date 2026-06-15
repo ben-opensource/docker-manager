@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS roles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT unique NOT NULL
+);
+CREATE TABLE IF NOT EXISTS rolePermissions (
+  role_id INTEGER NOT NULL,
+  code TEXT NOT NULL,
+  FOREIGN KEY(role_id) REFERENCES roles(id)
+);
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT unique NOT NULL,
+  password TEXT NOT NULL,
+  role_id INTEGER NOT NULL,
+  FOREIGN KEY(role_id) REFERENCES roles(id)
+);
